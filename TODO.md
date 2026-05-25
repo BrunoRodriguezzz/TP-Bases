@@ -23,9 +23,9 @@
 - [x] Provincia
 - [x] Alianza
 - [x] CanalVenta
-- [ ] MedioPago
+- [x] MedioPago
 - [x] Ciudad
-- [ ] Agencia
+- [x] Agencia
 - [ ] Aerolinea
 - [ ] Aeropuerto
 - [ ] Agente

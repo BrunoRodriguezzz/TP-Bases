@@ -455,7 +455,37 @@ BEGIN
 END;
 GO
 
-EXEC [QUEQUE].[Migrar_Canal_Venta];
+CREATE PROCEDURE [QUEQUE].[Migrar_Medio_Pago]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO [QUEQUE].[MedioPago] (descripcion)
+    SELECT 
+      distinct(Venta_Medio_Pago )
+    FROM gd_esquema.Maestra
+        where Venta_Medio_Pago is not null
+END;
 GO
 
-SELECT * FROM [QUEQUE].[CanalVenta];
+CREATE PROCEDURE [QUEQUE].[Migrar_Agencias]
+AS
+BEGIN
+    INSERT INTO [QUEQUE].[Agencia] (id_agencia, direccion, mail, telefono, localidad, provincia)
+    SELECT DISTINCT
+        m.Agencia_Nro_Agencia,
+        m.Agencia_Direccion,
+        m.Agencia_Mail,
+        m.Agencia_Telefono,
+        m.Agencia_Localidad,
+        p.id_provincia
+    FROM [gd_esquema].[Maestra] m
+    JOIN [QUEQUE].[Provincia] p ON p.prov_nombre = m.Agencia_Provincia
+    WHERE m.Agencia_Nro_Agencia IS NOT NULL;
+END
+GO
+
+EXEC [QUEQUE].[Migrar_Agencias];
+GO
+
+SELECT * FROM [QUEQUE].[Aerolinea];
+select distinct(Aerolinea_Codigo) from [gd_esquema].Maestra
