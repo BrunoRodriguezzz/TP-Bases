@@ -19,12 +19,12 @@
 
 # Checklist de entidades
 
-- [ X ] Pais
-- [ X ] Provincia
-- [ X ] Alianza
-- [ X ] CanalVenta
+- [x] Pais
+- [x] Provincia
+- [x] Alianza
+- [x] CanalVenta
 - [ ] MedioPago
-- [ X ] Ciudad
+- [x] Ciudad
 - [ ] Agencia
 - [ ] Aerolinea
 - [ ] Aeropuerto
