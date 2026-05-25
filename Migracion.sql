@@ -4,6 +4,9 @@
 -- Motor:   SQL Server
 -- ============================================================
 
+USE [GD1C2026];
+GO
+
 --CREATE SCHEMA QUEQUE;
 --GO
 
@@ -374,24 +377,59 @@ CREATE TABLE QUEQUE.ValoracionEncuesta (
     CONSTRAINT FK_Valoracion_Aspecto       FOREIGN KEY (id_aspecto)  REFERENCES QUEQUE.AspectoValorado(id_aspecto)
 );
 
-USE [GD1C2026];
-GO
+-- ============================================================
+-- MIGRACIONES
+-- ============================================================
 
+-- Migracion Paises Alternativa 1 -> trabajando con strings
+-- Esta alternativa deja los paises en Mayuscula sacando los acentos
+-- Si queremos acceder a esta tabla necesitamos hacer el mismo Replace y Upper con los datos en los joins
 CREATE PROCEDURE [QUEQUE].[Migrar_Paises]
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    WITH PaisesInicial AS (
+        SELECT [Aeropuerto_Salida_Pais] AS nombre_pais FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
+        UNION
+        SELECT [Aeropuerto_Llegada_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
+        UNION
+        SELECT [Aerolinea_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
+        UNION
+        SELECT [Hospedaje_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL
+    )
+
     INSERT INTO [QUEQUE].[Pais] (nombre)
-    SELECT [Aeropuerto_Salida_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
-    UNION
-    SELECT [Aeropuerto_Llegada_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
-    UNION
-    SELECT [Aerolinea_Pais]          FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
-    UNION
-    SELECT [Hospedaje_Pais]           FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
+    SELECT DISTINCT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE( UPPER(nombre_pais), 'Á', 'A'), 'É', 'E'), 'Í', 'I'), 'Ó', 'O'), 'Ú', 'U')
+    FROM PaisesInicial;
 END;
 GO
 
+-- Migracion Paises Alternativa 2 -> trabajando con la funcion Collate (cambia como se comparan los strings)
+-- Esta alternativa deja los paises como estan, guardando una de las varias alternativas
+-- Si queremos acceder a esta tabla necesitamos hacer el mismo Collate a ambos lados del join para asegurarnos que se verifiquen con los mismos criterios
+-- Ej: JOIN [QUEQUE].[Pais] p ON m.[Aerolinea_Pais] COLLATE Latin1_General_CI_AI = p.[nombre] COLLATE Latin1_General_CI_AI
+CREATE PROCEDURE [QUEQUE].[Migrar_Paises]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO [QUEQUE].[Pais] (nombre)
+    SELECT [Aeropuerto_Salida_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
+    UNION
+    SELECT [Aeropuerto_Llegada_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
+    UNION
+    SELECT [Aerolinea_Pais]          COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
+    UNION
+    SELECT [Hospedaje_Pais]          COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
+
+END;
+GO
+
+-- Migracion Paises Alternativa 3 -> mezclar las 2
+-- Guardo la tabla normalizada, pero para los joins hago el collate para no tener que andar modificando el string.
+
+-- Migracion Ciudades
 CREATE PROCEDURE [QUEQUE].[Migrar_Ciudades]
 AS
 BEGIN
@@ -414,6 +452,7 @@ BEGIN
 END;
 GO
 
+-- Migracion Alianzas
 CREATE PROCEDURE [QUEQUE].[Migrar_Alianzas]
 AS
 BEGIN
@@ -443,6 +482,7 @@ BEGIN
 END;
 GO
 
+-- Migracion Canal Venta
 CREATE PROCEDURE [QUEQUE].[Migrar_Canal_Venta]
 AS
 BEGIN
@@ -455,6 +495,7 @@ BEGIN
 END;
 GO
 
+-- Migracion Medio Pago
 CREATE PROCEDURE [QUEQUE].[Migrar_Medio_Pago]
 AS
 BEGIN
@@ -467,6 +508,7 @@ BEGIN
 END;
 GO
 
+-- Migracion Agencias
 CREATE PROCEDURE [QUEQUE].[Migrar_Agencias]
 AS
 BEGIN
@@ -484,6 +526,8 @@ BEGIN
 END
 GO
 
+
+-- Ejecuciones / Funciones Auxiliares / Testeo
 EXEC [QUEQUE].[Migrar_Agencias];
 GO
 
