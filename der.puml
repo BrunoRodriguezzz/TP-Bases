@@ -1,0 +1,374 @@
+@startuml DER
+hide circle
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 50
+
+entity "Agencia" as Agencia {
+  id_agencia : bigint <<PK>>
+  --
+  direccion : nvarchar(255)
+  mail : nvarchar(255)
+  telefono : nvarchar(255)
+  localidad : nvarchar(255)
+  provincia : bigint <<FK>>
+}
+
+entity "Pais" as Pais {
+  id_pais : bigint <<PK>>
+  --
+  nombre : nvarchar(255)
+}
+
+entity "Provincia" as Provincia {
+  id_provincia : bigint <<PK>>
+  --
+  prov_nombre : nvarchar(255)
+}
+
+entity "Agente" as Agente {
+  id_agente : bigint <<PK>>
+  --
+  id_agencia : bigint <<FK>>
+  nombre : nvarchar(255)
+  apellido : nvarchar(255)
+  dni : nvarchar(255)
+  fecha_nacimiento : date
+  telefono : nvarchar(255)
+  mail : nvarchar(255)
+  direccion : nvarchar(255)
+  localidad : nvarchar(255)
+  provincia : bigint <<FK>>
+}
+
+entity "Cliente" as Cliente {
+  id_cliente : bigint <<PK>>
+  --
+  nombre : nvarchar(255)
+  apellido : nvarchar(255)
+  dni : nvarchar(255)
+  direccion : nvarchar(255)
+  localidad : nvarchar(255)
+  provincia : bigint <<FK>>
+  fecha_nacimiento : date
+}
+
+entity "CanalVenta" as CanalVenta {
+  id_canal : bigint <<PK>>
+  --
+  descripcion : varchar(255)
+}
+
+entity "MedioPago" as MedioPago {
+  id_medio_pago : bigint <<PK>>
+  --
+  descripcion : varchar(255)
+}
+
+entity "Aeropuerto" as Aeropuerto {
+  id_aeropuerto : nvarchar(10) <<PK>>
+  --
+  descripcion : nvarchar(200)
+  id_ciudad : bigint <<FK>>
+  pais : bigint <<FK>>
+}
+
+
+entity "Aerolinea" as Aerolinea {
+  id_aerolinea : nvarchar(255) <<PK>>
+  --
+  nombre : nvarchar(255)
+  pais : bigint <<FK>>
+  alianza : bigint <<FK>>
+}
+
+entity "Alianza" as Alianza {
+  id_alianza : bigint <<PK>>
+  --
+  alianza : nvarchar(255)
+}
+
+entity "Vuelo" as Vuelo {
+  id_vuelo : bigint <<PK>>
+  --
+  id_aeropuerto_origen : nvarchar(10) <<FK>>
+  id_aeropuerto_destino : nvarchar(10) <<FK>>
+  id_aerolinea : nvarchar(255) <<FK>>
+  ' Esto seria considerando que el horario esta agrupado
+  fecha_salida : date
+  horario_salida: nvarchar(50)
+  fecha_llegada : date
+  horario_llegada: nvarchar(50)
+  duracion : int
+  precio : decimal(18,2)
+  incluye_carry : bit
+  incluye_valija : bit
+}
+
+entity "Hospedaje" as Hospedaje {
+  id_hospedaje : bigint <<PK>>
+  --
+  nombre : varchar(255)
+  direccion : varchar(255)
+  id_ciudad : bigint <<FK>>
+  pais : bigint <<FK>>
+  incluye_desayuno : bit
+  hora_checkin : varchar(50)
+  hora_checkout : varchar(50)
+}
+
+entity "Habitacion" as Habitacion {
+  id_habitacion : bigint <<PK>>
+  --
+  id_hospedaje : bigint <<FK>>
+  nombre : varchar(255)
+  descripcion : varchar(MAX)
+  precio : decimal(18,2)
+}
+
+entity "Proveedor" as Proveedor {
+  id_proveedor : bigint <<PK>>
+  --
+  nombre : nvarchar(255)
+  mail : nvarchar(255)
+  telefono : nvarchar(255)
+
+}
+
+entity "Excursion" as Excursion {
+  id_excursion : bigint <<PK>>
+  --
+  id_proveedor : bigint <<FK>>
+  nombre : varchar(255)
+  descripcion : varchar(MAX)
+  horario : nvarchar(50)
+  duracion : int
+  precio : decimal(18,2)
+}
+
+entity "Ciudad" as Ciudad {
+  id_ciudad : bigint <<PK>>
+  --
+  nombre : nvarchar(255)
+  pais : bigint <<FK>>
+}
+
+' ==============================
+' MODULO COTIZACIONES Y PROPUESTAS
+' ==============================
+
+entity "SolicitudCotizacion" as Solicitud {
+  nro_solicitud : bigint <<PK>>
+  --
+  id_cliente : bigint <<FK>>
+  id_agente : bigint <<FK>>
+  fecha_solicitud : date
+  fecha_inicio_tentativa : date
+  fecha_fin_tentativa : date
+  cant_pasajeros : int
+  presupuesto_estimado : decimal(18,2)
+  observaciones : nvarchar(MAX)
+}
+
+entity "Ciudad_x_Solicitud" as CiudadSolicitud {
+  id_ciudad : bigint <<FK>>
+  nro_solicitud : bigint <<FK>>
+  --
+  cant_dias : int
+  observaciones : nvarchar(MAX)
+}
+
+entity "Propuesta" as Propuesta {
+  id_propuesta : bigint <<PK>>
+  --
+  nro_solicitud : bigint <<FK>>
+  id_agente : bigint <<FK>>
+  fecha_emision : date
+  fecha_vigencia_hasta : date
+  fecha_desde : date
+  fecha_hasta : date
+  subtotal : decimal(18,2)
+  descuento : decimal(18,2)
+  importe_total : decimal(18,2)
+  id_estado : bigint <<FK>>
+}
+
+entity "EstadoPropuesta" as EstadoPropuesta {
+  id_estado : bigint <<PK>>
+  --
+  descripcion : varchar(255)
+}
+
+entity "Propuesta_Vuelo" as PropuestaVuelo {
+  id_propuesta : bigint <<FK>>
+  id_vuelo : bigint <<FK>>
+  --
+  cantidad : int
+  precio_unitario : decimal(18,2)
+  subtotal : decimal(18,2)
+}
+
+entity "Propuesta_Habitacion" as PropuestaHabitacion {
+  id_propuesta : bigint <<FK>>
+  id_habitacion : bigint <<FK>>
+  --
+  fecha_desde : date
+  fecha_hasta : date
+  cantidad : int
+  subtotal : decimal(18,2)
+  precio : decimal(18,2)
+}
+
+' ==============================
+' MODULO VENTAS Y RESERVAS
+' ==============================
+
+entity "Venta" as Venta {
+  nro_venta : bigint <<PK>>
+  --
+  id_agencia : bigint <<FK>>
+  id_cliente : bigint <<FK>>
+  id_agente : bigint <<FK>>
+  id_canal : bigint <<FK>> 
+  id_medio_pago : bigint <<FK>>
+  ' ----
+  ' Canal lo tenemos normalizado.
+  ' Medio pago lo tenemos normalizado.
+  fecha_venta : date
+  subtotal : decimal(18,2)
+  descuento : decimal(18,2)
+  importe_total : decimal(18,2)
+}
+
+entity "Venta_X_Propuesta" as Venta_X_Propuesta {
+  nro_venta : bigint <<PK, FK>>
+  id_propuesta : bigint <<PK, FK>>
+}
+
+entity "Reserva_Vuelo" as ResVuelo {
+  codigo_reserva : nvarchar(255) <<PK>>
+  --
+  nro_venta : bigint <<FK>>
+  id_vuelo : bigint <<FK>>
+  ' ----
+  cantidad_pasajes : int
+  precio : decimal(18,2)
+  subtotal : decimal(18,2)
+}
+
+entity "Reserva_Habitacion" as ResHabitacion {
+  codigo_reserva : nvarchar(255) <<PK>>
+  --
+  nro_venta : bigint <<FK>>
+  id_habitacion : bigint <<FK>>
+  ' ---
+  fecha_desde : date
+  fecha_hasta : date
+  cantidad : int
+  precio : decimal(18,2)
+  subtotal : decimal(18,2)
+}
+
+entity "Reserva_Excursion" as ResExcursion {
+  codigo_reserva : nvarchar(255) <<PK>>
+  --
+  nro_venta : bigint <<FK>>
+  id_excursion : bigint <<FK>>
+  ' ---
+  fecha_reserva : date
+  cantidad : int
+  precio : decimal(18,2)
+  subtotal : decimal(18,2)
+}
+
+' ==============================
+' MODULO ENCUESTAS
+' ==============================
+
+entity "Encuesta" as Encuesta {
+  id_encuesta : bigint <<PK>>
+  --
+  id_cliente : bigint <<FK>>
+  id_agente : bigint <<FK>>
+  fecha : date
+  comentario : nvarchar(MAX)
+}
+
+entity "AspectoValorado" as Aspecto {
+  id_aspecto : bigint <<PK>>
+  --
+  descripcion : nvarchar(255)
+}
+
+entity "ValoracionEncuesta" as Valoracion {
+  id_encuesta : bigint <<FK>>
+  id_aspecto : bigint <<FK>>
+  --
+  puntaje : int <<CHECK>>
+}
+
+' ==============================
+' RELACIONES
+' ==============================
+
+Agencia ||--o{ Agente
+Agente ||--o{ Solicitud
+Agente ||--o{ Propuesta
+Agente ||--o{ Venta
+Agente ||--o{ Encuesta
+
+Cliente ||--o{ Solicitud
+Cliente ||--o{ Venta
+Cliente ||--o{ Encuesta
+
+Aeropuerto ||--o{ Vuelo 
+Aeropuerto ||--o{ Vuelo 
+Aerolinea ||--o{ Vuelo
+
+' Ciudad relations
+Ciudad ||--o{ Aeropuerto
+Ciudad ||--o{ Hospedaje
+
+Hospedaje ||--o{ Habitacion
+Proveedor ||--o{ Excursion
+
+CanalVenta ||--o{ Venta
+MedioPago ||--o{ Venta
+
+Solicitud ||--o{ CiudadSolicitud
+Ciudad ||--o{ CiudadSolicitud
+
+Solicitud ||--o{ Propuesta
+Propuesta ||--|{ PropuestaVuelo
+Vuelo ||--o{ PropuestaVuelo
+Propuesta ||--|{ PropuestaHabitacion
+Habitacion ||--o{ PropuestaHabitacion
+
+Venta ||--o{ ResVuelo
+Vuelo ||--o{ ResVuelo
+
+Venta ||--o{ ResHabitacion
+Habitacion ||--o{ ResHabitacion
+
+Venta ||--o{ ResExcursion
+Excursion ||--o{ ResExcursion
+
+Encuesta ||--o{ Valoracion
+Aspecto ||--o{ Valoracion
+
+Agente ||--o{ Provincia
+Agencia ||--o{ Provincia
+Cliente ||--o{ Provincia
+
+Alianza ||--o{ Aerolinea
+EstadoPropuesta ||--o{ Propuesta
+
+Pais ||--o{ Ciudad
+Pais ||--o{ Aeropuerto
+Pais ||--o{ Aerolinea
+Pais ||--o{ Hospedaje
+
+Venta ||--|| Venta_X_Propuesta
+Propuesta ||--o{ Venta_X_Propuesta
+
+@enduml
