@@ -526,6 +526,72 @@ BEGIN
 END
 GO
 
+-- Migración de Aeropuertos
+CREATE PROCEDURE [QUEQUE].[Migrar_Aeropuerto]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO [QUEQUE].[Aeropuerto] (id_aeropuerto, descripcion, id_ciudad, pais)
+    SELECT 
+        DatosUnificados.CodigoAeropuerto,
+        DatosUnificados.DescripcionAeropuerto,
+        c.id_ciudad,
+        p.id_pais 
+    FROM (
+        SELECT TRIM([Aeropuerto_Salida_Codigo]) AS CodigoAeropuerto, TRIM([Aeropuerto_Salida_Descripcion]) AS DescripcionAeropuerto, TRIM([Aeropuerto_Salida_Ciudad]) AS NombreCiudad, TRIM([Aeropuerto_Salida_Pais]) AS NombrePais 
+        FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Codigo] IS NOT NULL
+        UNION
+        SELECT TRIM([Aeropuerto_Llegada_Codigo]), TRIM([Aeropuerto_Llegada_Descripcion]), TRIM([Aeropuerto_Llegada_Ciudad]), TRIM([Aeropuerto_Llegada_Pais]) 
+        FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Codigo] IS NOT NULL
+    ) AS DatosUnificados
+    JOIN [QUEQUE].[Pais] p ON p.nombre = DatosUnificados.NombrePais
+    JOIN [QUEQUE].[Ciudad] c ON c.nombre = DatosUnificados.NombreCiudad AND c.pais = p.id_pais;
+END
+GO
+
+-- Migración de Aerolíneas
+CREATE PROCEDURE [QUEQUE].[Migrar_Aerolineas]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO [QUEQUE].[Aerolinea] (id_aerolinea, nombre, pais, alianza)
+    SELECT DISTINCT
+        TRIM(m.Aerolinea_Codigo), 
+        TRIM(m.Aerolinea_Nombre), 
+        p.id_pais,
+        a.id_alianza
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN [QUEQUE].[Pais] p ON p.nombre = TRIM(m.Aerolinea_Pais)
+    JOIN [QUEQUE].[Alianza] a ON a.alianza = TRIM(m.Aerolinea_Alianza)
+    WHERE m.Aerolinea_Codigo IS NOT NULL;
+END;
+GO
+
+-- Migración de Agentes
+
+CREATE PROCEDURE [QUEQUE].[Migrar_Agentes]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO [QUEQUE].[Agente] (id_agencia, nombre, apellido, dni, fecha_nacimiento, telefono, mail, direccion, localidad, provincia)
+    SELECT DISTINCT
+        ag.id_agencia,
+        TRIM(m.Agente_Nombre), 
+        TRIM(m.Agente_Apellido),
+        TRIM(m.Agente_DNI),
+        m.Agente_Fecha_Nac, 
+        TRIM(m.Agente_Telefono),
+        TRIM(m.Agente_Mail),
+        TRIM(m.Agente_Direccion),
+        TRIM(m.Agente_Localidad),
+        p.id_provincia
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN [QUEQUE].[Agencia] ag ON ag.id_agencia = m.[Agencia_Nro_Agencia]
+    JOIN [QUEQUE].[Provincia] p ON p.prov_nombre = TRIM(m.[Agente_Provincia])
+    WHERE m.[Agente_DNI] IS NOT NULL; 
+END
+GO
+
 
 -- Ejecuciones / Funciones Auxiliares / Testeo
 EXEC [QUEQUE].[Migrar_Agencias];
