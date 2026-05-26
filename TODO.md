@@ -26,9 +26,9 @@
 - [x] MedioPago
 - [x] Ciudad
 - [x] Agencia
-- [ ] Aerolinea
-- [ ] Aeropuerto
-- [ ] Agente
+- [x] Aerolinea
+- [x] Aeropuerto
+- [x] Agente
 - [ ] Cliente
 - [ ] Hospedaje
 - [ ] Habitacion
