@@ -3,7 +3,6 @@
 -- ============================================================
 
 -- Procedures
--- Procedures
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Paises;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Provincia;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Alianzas;
@@ -22,6 +21,9 @@ DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Habitaciones;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Proveedores;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Excursiones;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Vuelos;
+DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Solicitud_Cotizacion;
+DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Solicitud_X_Ciudad;
+DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Propuesta;
 
 -- Detalle / tablas hoja
 DROP TABLE IF EXISTS QUEQUE.ValoracionEncuesta;

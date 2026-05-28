@@ -34,11 +34,11 @@
 - [x] Habitacion
 - [x] Proveedor
 - [x] Excursion
-- [ ] Vuelo
-- [ ] SolicitudCotizacion
-- [ ] Ciudad_x_Solicitud
-- [ ] Propuesta
-- [ ] EstadoPropuesta
+- [x] Vuelo
+- [x] SolicitudCotizacion
+- [x] Ciudad_x_Solicitud
+- [x] Propuesta
+- [x] EstadoPropuesta
 - [ ] Propuesta_Vuelo
 - [ ] Propuesta_Habitacion
 - [ ] Venta

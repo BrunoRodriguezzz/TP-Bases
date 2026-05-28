@@ -710,6 +710,80 @@ BEGIN
 END
 GO
 
+-- Migración Solicitud Cotización
+CREATE PROCEDURE [QUEQUE].[Migrar_Solicitud_Cotizacion]
+AS
+BEGIN
+    INSERT INTO QUEQUE.SolicitudCotizacion (nro_solicitud, id_cliente, id_agente, fecha_solicitud, fecha_inicio_tentativa, fecha_fin_tentativa, cant_pasajeros, presupuesto_estimado, observaciones)
+    SELECT DISTINCT
+        m.Solicitud_Nro_Solicitud,
+        c.id_cliente,
+        a.legajo,
+        m.Solicitud_Fecha_Solicitud,
+        m.Solicitud_Fecha_Inicio_Tentativa,
+        m.Solicitud_Fecha_Fin_Tentativa,
+        m.Solicitud_Cant_Pax,
+        m.Solicitud_Presupuesto_Estimado,
+        m.Solicitud_Observaciones
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.Cliente c ON c.nombre = m.Cliente_Nombre and c.apellido = m.Cliente_Apellido and c.dni = m.Cliente_Dni
+    JOIN QUEQUE.Agente a ON a.nombre = m.Agente_Nombre AND a.apellido = m.Agente_Apellido
+    WHERE m.Solicitud_Nro_Solicitud IS NOT NULL;
+END
+GO
+
+-- Migración Solicitud_X_Ciudad
+CREATE PROCEDURE [QUEQUE].[Migrar_Solicitud_X_Ciudad]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Ciudad_x_Solicitud (nro_solicitud, id_ciudad, cant_dias, observaciones)
+    SELECT DISTINCT
+        m.Solicitud_Nro_Solicitud,
+        c.id_ciudad,
+        m.Detalle_Solicitud_Cant_Dias_Aprox,
+        m.Detalle_Solicitud_Observaciones
+    from [GD1C2026].[gd_esquema].[Maestra] m
+    join QUEQUE.Ciudad c on c.nombre = m.Detalle_Solicitud_Ciudad
+    where m.Solicitud_Nro_Solicitud is not null and m.Detalle_Solicitud_Ciudad is not null
+END
+GO
+
+-- Migración Estado Propuesta
+CREATE PROCEDURE [QUEQUE].[Migrar_Estado_Propuesta]
+AS
+BEGIN
+    INSERT INTO [QUEQUE].[EstadoPropuesta] (descripcion)
+    SELECT DISTINCT 
+        TRIM(Propuesta_Estado)
+    FROM [GD1C2026].[gd_esquema].[Maestra]
+    WHERE Propuesta_Estado IS NOT NULL;
+END
+GO
+
+-- Migración Propuesta
+CREATE PROCEDURE [QUEQUE].[Migrar_Propuesta]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Propuesta (id_propuesta, nro_solicitud, id_agente, fecha_emision, fecha_vigencia_hasta, fecha_desde, fecha_hasta, subtotal, descuento, importe_total, id_estado)
+    SELECT DISTINCT
+        m.Propuesta_Nro_Propuesta,
+        m.Solicitud_Nro_Solicitud,
+        a.legajo,
+        m.Propuesta_Fecha_Emision,
+        m.Propuesta_Vigencia_Hasta,
+        m.Propuesta_Fecha_Desde,
+        m.Propuesta_Fecha_Hasta,
+        m.Propuesta_Subtotal,
+        m.Propuesta_Descuento,
+        m.Propuesta_Importe_Total,
+        ep.id_estado
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.Agente a ON a.nombre = m.Agente_Nombre AND a.apellido = m.Agente_Apellido
+    JOIN QUEQUE.EstadoPropuesta ep ON ep.descripcion = TRIM(m.Propuesta_Estado)
+    WHERE m.Propuesta_Nro_Propuesta IS NOT NULL;
+END
+GO
+
 -- ============================================================
 -- EJECUTAR PROCEDIMIENTOS DE MIGRACION
 -- ============================================================
@@ -762,6 +836,18 @@ GO
 EXEC [QUEQUE].[Migrar_Vuelos];
 GO
 
--- ============================================================
--- Queries de prueba
--- ============================================================
+EXEC [QUEQUE].[Migrar_Solicitud_Cotizacion];
+GO
+
+EXEC [QUEQUE].[Migrar_Solicitud_X_Ciudad];
+GO
+
+EXEC [QUEQUE].[Migrar_Estado_Propuesta];
+GO
+
+EXEC [QUEQUE].[Migrar_Propuesta];
+GO
+
+-- -- ============================================================
+-- -- Queries de prueba
+-- -- ============================================================
