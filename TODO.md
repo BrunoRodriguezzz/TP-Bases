@@ -34,7 +34,7 @@
 - [x] Habitacion
 - [x] Proveedor
 - [x] Excursion
-- [ ] Vuelo
+- [x] Vuelo
 - [ ] SolicitudCotizacion
 - [ ] Ciudad_x_Solicitud
 - [ ] Propuesta
