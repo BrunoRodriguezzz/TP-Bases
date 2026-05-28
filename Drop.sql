@@ -21,6 +21,7 @@ DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Hospedajes;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Habitaciones;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Proveedores;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Excursiones;
+DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Vuelos;
 
 -- Detalle / tablas hoja
 DROP TABLE IF EXISTS QUEQUE.ValoracionEncuesta;

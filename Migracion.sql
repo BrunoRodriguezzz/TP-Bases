@@ -413,53 +413,24 @@ GO
 -- MIGRACIONES
 -- ============================================================
 
--- Migracion Paises Alternativa 1 -> trabajando con strings
--- Esta alternativa deja los paises en Mayuscula sacando los acentos
--- Si queremos acceder a esta tabla necesitamos hacer el mismo Replace y Upper con los datos en los joins
+-- Migracion Paises Alternativa 2 -> trabajando con la funcion Collate (cambia como se comparan los strings)
+-- Esta alternativa deja los paises como estan, guardando una de las varias alternativas
+-- Si queremos acceder a esta tabla necesitamos hacer el mismo Collate a ambos lados del join para asegurarnos que se verifiquen con los mismos criterios
+-- Ejemplo JOIN [QUEQUE].[Pais] p ON m.[Aerolinea_Pais] COLLATE Latin1_General_CI_AI = p.[nombre] COLLATE Latin1_General_CI_AI
 CREATE PROCEDURE [QUEQUE].[Migrar_Paises]
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    WITH PaisesInicial AS (
-        SELECT [Aeropuerto_Salida_Pais] AS nombre_pais FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
-        UNION
-        SELECT [Aeropuerto_Llegada_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
-        UNION
-        SELECT [Aerolinea_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
-        UNION
-        SELECT [Hospedaje_Pais] FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL
-    )
-
     INSERT INTO [QUEQUE].[Pais] (nombre)
-    SELECT DISTINCT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE( UPPER(nombre_pais), 'Á', 'A'), 'É', 'E'), 'Í', 'I'), 'Ó', 'O'), 'Ú', 'U')
-    FROM PaisesInicial;
+    SELECT [Aeropuerto_Salida_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
+    UNION
+    SELECT [Aeropuerto_Llegada_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
+    UNION
+    SELECT [Aerolinea_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
+    UNION
+    SELECT [Hospedaje_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
 END;
 GO
-
--- Migracion Paises Alternativa 2 -> trabajando con la funcion Collate (cambia como se comparan los strings)
--- Esta alternativa deja los paises como estan, guardando una de las varias alternativas
--- Si queremos acceder a esta tabla necesitamos hacer el mismo Collate a ambos lados del join para asegurarnos que se verifiquen con los mismos criterios
--- Ej: JOIN [QUEQUE].[Pais] p ON m.[Aerolinea_Pais] COLLATE Latin1_General_CI_AI = p.[nombre] COLLATE Latin1_General_CI_AI
--- CREATE PROCEDURE [QUEQUE].[Migrar_Paises2]
--- AS
--- BEGIN
---     SET NOCOUNT ON;
-
---     INSERT INTO [QUEQUE].[Pais] (nombre)
---     SELECT [Aeropuerto_Salida_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
---     UNION
---     SELECT [Aeropuerto_Llegada_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
---     UNION
---     SELECT [Aerolinea_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
---     UNION
---     SELECT [Hospedaje_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
-
--- END;
--- GO
-
--- Migracion Paises Alternativa 3 -> mezclar las 2
--- Guardo la tabla normalizada, pero para los joins hago el collate para no tener que andar modificando el string.
 
 -- Migracion Ciudades
 CREATE PROCEDURE [QUEQUE].[Migrar_Ciudades]
@@ -480,7 +451,8 @@ BEGIN
         SELECT TRIM([Hospedaje_Ciudad]), TRIM([Hospedaje_Pais]) 
         FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Ciudad] IS NOT NULL
     ) AS DatosUnificados
-    JOIN [QUEQUE].[Pais] p ON p.nombre = DatosUnificados.NombrePais;
+    JOIN [QUEQUE].[Pais] p ON DatosUnificados.NombrePais COLLATE Latin1_General_CI_AI 
+                            = p.nombre                   COLLATE Latin1_General_CI_AI;
 END;
 GO
 
@@ -577,7 +549,7 @@ BEGIN
         SELECT TRIM([Aeropuerto_Llegada_Codigo]), TRIM([Aeropuerto_Llegada_Descripcion]), TRIM([Aeropuerto_Llegada_Ciudad]), TRIM([Aeropuerto_Llegada_Pais]) 
         FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Codigo] IS NOT NULL
     ) AS DatosUnificados
-    JOIN [QUEQUE].[Pais] p ON p.nombre = DatosUnificados.NombrePais
+    JOIN [QUEQUE].[Pais] p ON p.nombre COLLATE Latin1_General_CI_AI = DatosUnificados.NombrePais COLLATE Latin1_General_CI_AI
     JOIN [QUEQUE].[Ciudad] c ON c.nombre = DatosUnificados.NombreCiudad AND c.pais = p.id_pais;
 END
 GO
@@ -594,7 +566,7 @@ BEGIN
         p.id_pais,
         a.id_alianza
     FROM [GD1C2026].[gd_esquema].[Maestra] m
-    JOIN [QUEQUE].[Pais] p ON p.nombre = TRIM(m.Aerolinea_Pais)
+    JOIN [QUEQUE].[Pais] p ON p.nombre COLLATE Latin1_General_CI_AI = TRIM(m.Aerolinea_Pais) COLLATE Latin1_General_CI_AI
     JOIN [QUEQUE].[Alianza] a ON a.alianza = TRIM(m.Aerolinea_Alianza)
     WHERE m.Aerolinea_Codigo IS NOT NULL;
 END;
@@ -658,7 +630,7 @@ BEGIN
         m.Hospedaje_Check_In,
         m.Hospedaje_Check_Out
     FROM [GD1C2026].[gd_esquema].[Maestra] m
-    INNER JOIN QUEQUE.Pais p    ON p.nombre  = m.Hospedaje_Pais
+    INNER JOIN QUEQUE.Pais p    ON p.nombre COLLATE Latin1_General_CI_AI = m.Hospedaje_Pais COLLATE Latin1_General_CI_AI
     INNER JOIN QUEQUE.Ciudad c  ON c.nombre  = m.Hospedaje_Ciudad
                                 AND c.pais   = p.id_pais
     WHERE m.Hospedaje_Nombre IS NOT NULL;
@@ -713,6 +685,31 @@ BEGIN
 END
 GO
 
+-- Migración Vuelo
+CREATE PROCEDURE [QUEQUE].[Migrar_Vuelos]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Vuelo (id_aerolinea, id_aeropuerto_origen, id_aeropuerto_destino, fecha_salida, fecha_llegada, horario_salida, horario_llegada, duracion, precio, incluye_carry, incluye_valija)
+    SELECT DISTINCT
+        ap.id_aerolinea,
+        aps.id_aeropuerto,
+        apl.id_aeropuerto,
+        m.Vuelo_Fecha_Salida,
+        m.Vuelo_Fecha_Llegada,
+        m.Vuelo_Horario_Salida,
+        m.Vuelo_Horario_Llegada,
+        m.Vuelo_Duracion,
+        m.Vuelo_Precio,
+        m.Vuelo_Incluye_Carry,
+        m.Vuelo_Incluye_Valija
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.Aerolinea  ap  ON ap.id_aerolinea   = m.Aerolinea_Codigo
+    JOIN QUEQUE.Aeropuerto aps ON aps.id_aeropuerto = m.Aeropuerto_Salida_Codigo
+    JOIN QUEQUE.Aeropuerto apl ON apl.id_aeropuerto = m.Aeropuerto_Llegada_Codigo
+    WHERE m.Vuelo_Fecha_Salida IS NOT NULL;
+END
+GO
+
 -- ============================================================
 -- EJECUTAR PROCEDIMIENTOS DE MIGRACION
 -- ============================================================
@@ -762,9 +759,9 @@ GO
 EXEC [QUEQUE].[Migrar_Excursiones];
 GO
 
+EXEC [QUEQUE].[Migrar_Vuelos];
+GO
+
 -- ============================================================
 -- Queries de prueba
 -- ============================================================
-
-select count(distinct Excursion_Nombre) from [GD1C2026].[gd_esquema].[Maestra] where Excursion_Nombre is not null
-select * from QUEQUE.Excursion
