@@ -46,9 +46,9 @@
 - [x] Reserva_Vuelo
 - [x] Reserva_Habitacion
 - [x] Reserva_Excursion
-- [ ] Encuesta
-- [ ] AspectoValorado
-- [ ] ValoracionEncuesta
+- [x] Encuesta
+- [x] AspectoValorado
+- [x] ValoracionEncuesta
 
 # Triggers hechos
 
