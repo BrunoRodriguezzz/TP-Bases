@@ -30,10 +30,10 @@
 - [x] Aeropuerto
 - [x] Agente
 - [x] Cliente
-- [ ] Hospedaje
-- [ ] Habitacion
-- [ ] Proveedor
-- [ ] Excursion
+- [x] Hospedaje
+- [x] Habitacion
+- [x] Proveedor
+- [x] Excursion
 - [ ] Vuelo
 - [ ] SolicitudCotizacion
 - [ ] Ciudad_x_Solicitud

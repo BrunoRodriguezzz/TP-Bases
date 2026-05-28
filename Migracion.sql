@@ -644,6 +644,75 @@ BEGIN
 END
 GO
 
+-- Migracion Hospedajes
+CREATE PROCEDURE [QUEQUE].[Migrar_Hospedajes]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Hospedaje (nombre, direccion, id_ciudad, pais, incluye_desayuno, hora_checkin, hora_checkout)
+    SELECT DISTINCT
+        m.Hospedaje_Nombre,
+        m.Hospedaje_Direccion,
+        c.id_ciudad,
+        p.id_pais,
+        m.Hospedaje_Incluye_Desayuno,
+        m.Hospedaje_Check_In,
+        m.Hospedaje_Check_Out
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    INNER JOIN QUEQUE.Pais p    ON p.nombre  = m.Hospedaje_Pais
+    INNER JOIN QUEQUE.Ciudad c  ON c.nombre  = m.Hospedaje_Ciudad
+                                AND c.pais   = p.id_pais
+    WHERE m.Hospedaje_Nombre IS NOT NULL;
+END
+GO
+
+-- Migracion Habitaciones
+CREATE PROCEDURE [QUEQUE].[Migrar_Habitaciones]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Habitacion (id_hospedaje, nombre, descripcion, precio)
+    SELECT DISTINCT
+        h.id_hospedaje,
+        m.Habitacion_Nombre,
+        m.Habitacion_Descripcion,
+        m.Habitacion_Precio_Noche
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.Hospedaje h ON h.nombre = m.Hospedaje_Nombre
+    WHERE m.Habitacion_Nombre IS NOT NULL;
+END
+GO
+
+-- Migración Proveedores
+CREATE PROCEDURE [QUEQUE].[Migrar_Proveedores]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Proveedor (nombre, mail, telefono)
+    SELECT DISTINCT
+        Proveedor_Nombre,
+        Proveedor_Mail,
+        Proveedor_Telefono
+    FROM [GD1C2026].[gd_esquema].[Maestra]
+    WHERE Proveedor_Nombre IS NOT NULL;
+END
+GO
+
+-- Migración Excursión
+CREATE PROCEDURE [QUEQUE].[Migrar_Excursiones]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Excursion (id_proveedor, nombre, descripcion, horario, duracion, precio)
+    SELECT DISTINCT
+        p.id_proveedor,
+        m.Excursion_Nombre,
+        m.Excursion_Descripcion,
+        m.Excursion_Horario,
+        m.Excursion_Duracion,
+        m.Excursion_Precio
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.Proveedor p ON p.nombre = m.Proveedor_Nombre
+    WHERE m.Excursion_Nombre IS NOT NULL;
+END
+GO
+
 -- ============================================================
 -- EJECUTAR PROCEDIMIENTOS DE MIGRACION
 -- ============================================================
@@ -681,9 +750,21 @@ GO
 EXEC [QUEQUE].[Migrar_Clientes];
 GO
 
+EXEC [QUEQUE].[Migrar_Hospedajes];
+GO
+
+EXEC [QUEQUE].[Migrar_Habitaciones];
+GO
+
+EXEC [QUEQUE].[Migrar_Proveedores];
+GO
+
+EXEC [QUEQUE].[Migrar_Excursiones];
+GO
+
 -- ============================================================
 -- Queries de prueba
 -- ============================================================
 
-SELECT count(distinct(dni)) FROM [QUEQUE].[Cliente];
-select count(distinct(Cliente_Dni)) from [gd_esquema].Maestra
+select count(distinct Excursion_Nombre) from [GD1C2026].[gd_esquema].[Maestra] where Excursion_Nombre is not null
+select * from QUEQUE.Excursion
