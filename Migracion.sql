@@ -916,6 +916,56 @@ BEGIN
 END
 GO
 
+-- Migración Aspecto Valorado
+CREATE PROCEDURE [QUEQUE].[Migrar_AspectoValorado]
+AS
+BEGIN
+    INSERT INTO QUEQUE.AspectoValorado (descripcion)
+    SELECT DISTINCT
+        TRIM(m.Aspecto_Aspecto) 
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    WHERE m.Aspecto_Aspecto IS NOT NULL;
+END
+GO
+
+-- Migración Encuesta
+CREATE PROCEDURE [QUEQUE].[Migrar_Encuestas]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Encuesta (id_encuesta, id_cliente, id_agente, fecha, comentario)
+    SELECT DISTINCT
+        m.Encuesta_Codigo_Encuesta,
+        c.id_cliente,
+        a.legajo,
+        m.Encuesta_Fecha_Encuesta,
+        m.Encuesta_Comentarios
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.Cliente c ON c.dni = m.Cliente_Dni 
+                         AND c.nombre = m.Cliente_Nombre 
+                         AND c.apellido = m.Cliente_Apellido
+    JOIN QUEQUE.Agente a ON a.dni = m.Agente_Dni
+    WHERE m.Encuesta_Codigo_Encuesta IS NOT NULL;
+END
+GO
+
+-- Migración ValoracionEncuesta
+
+CREATE PROCEDURE [QUEQUE].[Migrar_ValoracionEncuesta]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO QUEQUE.ValoracionEncuesta (id_encuesta, id_aspecto, puntaje)
+    SELECT DISTINCT
+        m.Encuesta_Codigo_Encuesta,
+        av.id_aspecto,
+        m.Detalle_Encuesta_Puntaje 
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.AspectoValorado av ON av.descripcion = TRIM(m.Aspecto_Aspecto)
+    WHERE m.Encuesta_Codigo_Encuesta IS NOT NULL  
+    AND m.Aspecto_Aspecto IS NOT NULL;
+END
+GO
 -- ============================================================
 -- EJECUTAR PROCEDIMIENTOS DE MIGRACION
 -- ============================================================
@@ -992,6 +1042,14 @@ GO
 EXEC [QUEQUE].[Migrar_Reserva_Excursion];
 GO
 
+EXEC [QUEQUE].[Migrar_AspectoValorado]
+GO
+
+EXEC [QUEQUE].[Migrar_Encuestas]
+GO
+
+EXEC [QUEQUE].[Migrar_ValoracionEncuesta]
+GO
 
 -- -- ============================================================
 -- -- Queries de prueba
