@@ -41,11 +41,11 @@
 - [x] EstadoPropuesta
 - [ ] Propuesta_Vuelo
 - [ ] Propuesta_Habitacion
-- [ ] Venta
+- [x] Venta
 - [ ] Venta_X_Propuesta
-- [ ] Reserva_Vuelo
-- [ ] Reserva_Habitacion
-- [ ] Reserva_Excursion
+- [x] Reserva_Vuelo
+- [x] Reserva_Habitacion
+- [x] Reserva_Excursion
 - [ ] Encuesta
 - [ ] AspectoValorado
 - [ ] ValoracionEncuesta

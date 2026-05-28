@@ -784,6 +784,138 @@ BEGIN
 END
 GO
 
+-- Migracion Ventas
+CREATE PROCEDURE [QUEQUE].[Migrar_Ventas]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Venta (
+        nro_venta,
+        id_agencia,
+        id_cliente,
+        id_agente,
+        id_canal,
+        id_medio_pago,
+        fecha_venta,
+        subtotal,
+        descuento,
+        importe_total
+    )
+    SELECT DISTINCT
+        M.[Venta_Nro_Venta],
+        AG.[id_agencia],
+        C.[id_cliente],
+        A.legajo,
+        CV.[id_canal],
+        MP.[id_medio_pago],
+        M.[Venta_Fecha_Venta],
+        M.[Venta_Subtotal],
+        M.[Venta_Descuento],
+        M.[Venta_Importe_Total]
+    FROM [GD1C2026].[gd_esquema].[Maestra] M
+    INNER JOIN QUEQUE.Agencia AG ON AG.direccion = M.[Agencia_Direccion]
+    INNER JOIN QUEQUE.Cliente C ON C.dni = M.[Cliente_Dni] 
+                                AND C.nombre = M.[Cliente_Nombre] 
+                                AND C.apellido = M.[Cliente_Apellido]
+    INNER JOIN QUEQUE.Agente A ON A.dni = M.[Agente_Dni]
+    INNER JOIN QUEQUE.CanalVenta CV ON M.[Venta_Canal_Venta] = CV.descripcion
+    INNER JOIN QUEQUE.MedioPago MP ON M.[Venta_Medio_Pago] = MP.descripcion
+    WHERE M.[Venta_Nro_Venta] IS NOT NULL;
+END
+GO
+
+-- Migracion Reserva_Vuelo
+CREATE PROCEDURE [QUEQUE].[Migrar_Reserva_Vuelo]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Reserva_Vuelo (
+        codigo_reserva,
+        nro_venta,
+        id_vuelo,
+        cantidad_pasajes,
+        precio,
+        subtotal
+    )
+    SELECT DISTINCT
+        M.[Detalle_Venta_Vuelo_Cod_Reserva],
+        M.[Venta_Nro_Venta],
+        V.[id_vuelo],
+        M.[Detalle_Venta_Vuelo_Cantidad_Pasajes],
+        M.[Detalle_Venta_Vuelo_Precio_Unitario],
+        M.[Detalle_Venta_Vuelo_Subtotal]
+    FROM [GD1C2026].[gd_esquema].[Maestra] M
+    INNER JOIN QUEQUE.Vuelo V ON V.id_aerolinea = M.[Aerolinea_Codigo]
+                             AND V.id_aeropuerto_origen = M.[Aeropuerto_Salida_Codigo]
+                             AND V.id_aeropuerto_destino = M.[Aeropuerto_Llegada_Codigo]
+                             AND V.fecha_salida = M.[Vuelo_Fecha_Salida]
+                             AND V.horario_salida = M.[Vuelo_Horario_Salida]
+    WHERE M.[Venta_Nro_Venta] IS NOT NULL 
+      AND M.[Detalle_Venta_Vuelo_Cod_Reserva] IS NOT NULL;
+END
+GO
+
+-- Migracion Reserva_Habitacion
+CREATE PROCEDURE [QUEQUE].[Migrar_Reserva_Habitacion]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Reserva_Habitacion (
+        codigo_reserva,
+        nro_venta,
+        id_habitacion,
+        fecha_desde,
+        fecha_hasta,
+        cantidad,
+        precio,
+        subtotal
+    )
+    SELECT DISTINCT
+        M.[Detalle_Venta_Hospedaje_Cod_Reserva],
+        M.[Venta_Nro_Venta],
+        HAB.[id_habitacion],
+        M.[Detalle_Venta_Hospedaje_Fecha_Desde],
+        M.[Detalle_Venta_Hospedaje_Fecha_Hasta],
+        M.[Detalle_Venta_Hospedaje_Cantidad],
+        M.[Detalle_Venta_Hospedaje_Precio_Unitario],
+        M.[Detalle_Venta_Hospedaje_Subtotal]
+    FROM [GD1C2026].[gd_esquema].[Maestra] M
+    INNER JOIN QUEQUE.Hospedaje HOS ON HOS.nombre = M.[Hospedaje_Nombre]
+                                   AND HOS.direccion = M.[Hospedaje_Direccion]
+    INNER JOIN QUEQUE.Habitacion HAB ON HAB.id_hospedaje = HOS.id_hospedaje
+                                  AND HAB.nombre = M.[Habitacion_Nombre]
+    WHERE M.[Venta_Nro_Venta] IS NOT NULL 
+      AND M.[Detalle_Venta_Hospedaje_Cod_Reserva] IS NOT NULL;
+END
+GO
+
+-- Migracion Reserva_Excursion
+CREATE PROCEDURE [QUEQUE].[Migrar_Reserva_Excursion]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Reserva_Excursion (
+        codigo_reserva,
+        nro_venta,
+        id_excursion,
+        fecha_reserva,
+        cantidad,
+        precio,
+        subtotal
+    )
+    SELECT DISTINCT
+        M.[Detalle_Venta_Excursion_Cod_Reserva],
+        M.[Venta_Nro_Venta],
+        E.[id_excursion],
+        M.[Detalle_Venta_Excursion_Fecha_Reserva],
+        M.[Detalle_Venta_Excursion_Cant],
+        M.[Detalle_Venta_Excursion_Precio_Unitario],
+        M.[Detalle_Venta_Excursion_Subtotal]
+    FROM [GD1C2026].[gd_esquema].[Maestra] M
+    INNER JOIN QUEQUE.Proveedor P ON P.nombre = M.[Proveedor_Nombre]
+    INNER JOIN QUEQUE.Excursion E ON E.id_proveedor = P.id_proveedor 
+                                AND E.nombre = M.[Excursion_Nombre]      
+    WHERE M.[Venta_Nro_Venta] IS NOT NULL 
+      AND M.[Detalle_Venta_Excursion_Cod_Reserva] IS NOT NULL;
+END
+GO
+
 -- ============================================================
 -- EJECUTAR PROCEDIMIENTOS DE MIGRACION
 -- ============================================================
@@ -847,6 +979,19 @@ GO
 
 EXEC [QUEQUE].[Migrar_Propuesta];
 GO
+
+EXEC [QUEQUE].[Migrar_Ventas];
+GO
+
+EXEC [QUEQUE].[Migrar_Reserva_Vuelo];
+GO
+
+EXEC [QUEQUE].[Migrar_Reserva_Habitacion];
+GO
+
+EXEC [QUEQUE].[Migrar_Reserva_Excursion];
+GO
+
 
 -- -- ============================================================
 -- -- Queries de prueba
