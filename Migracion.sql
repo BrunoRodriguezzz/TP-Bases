@@ -7,8 +7,8 @@
 USE [GD1C2026];
 GO
 
---CREATE SCHEMA QUEQUE;
---GO
+CREATE SCHEMA QUEQUE;
+GO
 
 -- ============================================================
 -- MODULO GEOGRAFICO
@@ -19,12 +19,14 @@ CREATE TABLE QUEQUE.Pais (
     nombre    NVARCHAR(255) NULL,
     CONSTRAINT PK_Pais PRIMARY KEY (id_pais)
 );
+GO
 
 CREATE TABLE QUEQUE.Provincia (
     id_provincia BIGINT        IDENTITY(1,1) NOT NULL,
     prov_nombre  NVARCHAR(255) NULL,
     CONSTRAINT PK_Provincia PRIMARY KEY (id_provincia)
 );
+GO
 
 CREATE TABLE QUEQUE.Ciudad (
     id_ciudad BIGINT        IDENTITY(1,1) NOT NULL,
@@ -33,6 +35,7 @@ CREATE TABLE QUEQUE.Ciudad (
     CONSTRAINT PK_Ciudad    PRIMARY KEY (id_ciudad),
     CONSTRAINT FK_Ciudad_Pais FOREIGN KEY (pais) REFERENCES QUEQUE.Pais(id_pais)
 );
+GO
 
 -- ============================================================
 -- MODULO AGENCIAS Y AGENTES
@@ -48,6 +51,7 @@ CREATE TABLE QUEQUE.Agencia (
     CONSTRAINT PK_Agencia          PRIMARY KEY (id_agencia),
     CONSTRAINT FK_Agencia_Provincia FOREIGN KEY (provincia) REFERENCES QUEQUE.Provincia(id_provincia)
 );
+GO
 
 CREATE TABLE QUEQUE.Agente (
     legajo           BIGINT        IDENTITY(1,1) NOT NULL,
@@ -65,6 +69,7 @@ CREATE TABLE QUEQUE.Agente (
     CONSTRAINT FK_Agente_Agencia   FOREIGN KEY (id_agencia) REFERENCES QUEQUE.Agencia(id_agencia),
     CONSTRAINT FK_Agente_Provincia FOREIGN KEY (provincia)  REFERENCES QUEQUE.Provincia(id_provincia)
 );
+GO
 
 -- ============================================================
 -- MODULO CLIENTES
@@ -84,6 +89,7 @@ CREATE TABLE QUEQUE.Cliente (
     CONSTRAINT PK_Cliente           PRIMARY KEY (id_cliente),
     CONSTRAINT FK_Cliente_Provincia FOREIGN KEY (provincia) REFERENCES QUEQUE.Provincia(id_provincia)
 );
+GO
 
 -- ============================================================
 -- TABLAS DE REFERENCIA / LOOKUPS
@@ -94,24 +100,28 @@ CREATE TABLE QUEQUE.CanalVenta (
     descripcion VARCHAR(255) NULL,
     CONSTRAINT PK_CanalVenta PRIMARY KEY (id_canal)
 );
+GO
 
 CREATE TABLE QUEQUE.MedioPago (
     id_medio_pago BIGINT       IDENTITY(1,1) NOT NULL,
     descripcion   VARCHAR(255) NULL,
     CONSTRAINT PK_MedioPago PRIMARY KEY (id_medio_pago)
 );
+GO
 
 CREATE TABLE QUEQUE.Alianza (
     id_alianza BIGINT        IDENTITY(1,1) NOT NULL,
     alianza    NVARCHAR(255) NULL,
     CONSTRAINT PK_Alianza PRIMARY KEY (id_alianza)
 );
+GO
 
 CREATE TABLE QUEQUE.EstadoPropuesta (
     id_estado   BIGINT       IDENTITY(1,1) NOT NULL,
     descripcion VARCHAR(255) NULL,
     CONSTRAINT PK_EstadoPropuesta PRIMARY KEY (id_estado)
 );
+GO
 
 -- ============================================================
 -- MODULO AEREO
@@ -126,6 +136,7 @@ CREATE TABLE QUEQUE.Aerolinea (
     CONSTRAINT FK_Aerolinea_Pais    FOREIGN KEY (pais)    REFERENCES QUEQUE.Pais(id_pais),
     CONSTRAINT FK_Aerolinea_Alianza FOREIGN KEY (alianza) REFERENCES QUEQUE.Alianza(id_alianza)
 );
+GO
 
 CREATE TABLE QUEQUE.Aeropuerto (
     id_aeropuerto NVARCHAR(10)  NOT NULL,
@@ -136,6 +147,7 @@ CREATE TABLE QUEQUE.Aeropuerto (
     CONSTRAINT FK_Aeropuerto_Ciudad  FOREIGN KEY (id_ciudad) REFERENCES QUEQUE.Ciudad(id_ciudad),
     CONSTRAINT FK_Aeropuerto_Pais    FOREIGN KEY (pais)      REFERENCES QUEQUE.Pais(id_pais)
 );
+GO
 
 CREATE TABLE QUEQUE.Vuelo (
     id_vuelo               BIGINT         IDENTITY(1,1) NOT NULL,
@@ -155,6 +167,7 @@ CREATE TABLE QUEQUE.Vuelo (
     CONSTRAINT FK_Vuelo_Destino      FOREIGN KEY (id_aeropuerto_destino) REFERENCES QUEQUE.Aeropuerto(id_aeropuerto),
     CONSTRAINT FK_Vuelo_Aerolinea    FOREIGN KEY (id_aerolinea)          REFERENCES QUEQUE.Aerolinea(id_aerolinea)
 );
+GO
 
 -- ============================================================
 -- MODULO HOSPEDAJES
@@ -173,6 +186,7 @@ CREATE TABLE QUEQUE.Hospedaje (
     CONSTRAINT FK_Hospedaje_Ciudad FOREIGN KEY (id_ciudad) REFERENCES QUEQUE.Ciudad(id_ciudad),
     CONSTRAINT FK_Hospedaje_Pais   FOREIGN KEY (pais)      REFERENCES QUEQUE.Pais(id_pais)
 );
+GO
 
 CREATE TABLE QUEQUE.Habitacion (
     id_habitacion BIGINT        IDENTITY(1,1) NOT NULL,
@@ -183,6 +197,7 @@ CREATE TABLE QUEQUE.Habitacion (
     CONSTRAINT PK_Habitacion          PRIMARY KEY (id_habitacion),
     CONSTRAINT FK_Habitacion_Hospedaje FOREIGN KEY (id_hospedaje) REFERENCES QUEQUE.Hospedaje(id_hospedaje)
 );
+GO
 
 -- ============================================================
 -- MODULO EXCURSIONES
@@ -195,6 +210,7 @@ CREATE TABLE QUEQUE.Proveedor (
     telefono     NVARCHAR(255) NULL,
     CONSTRAINT PK_Proveedor PRIMARY KEY (id_proveedor)
 );
+GO
 
 CREATE TABLE QUEQUE.Excursion (
     id_excursion BIGINT        IDENTITY(1,1) NOT NULL,
@@ -207,6 +223,7 @@ CREATE TABLE QUEQUE.Excursion (
     CONSTRAINT PK_Excursion          PRIMARY KEY (id_excursion),
     CONSTRAINT FK_Excursion_Proveedor FOREIGN KEY (id_proveedor) REFERENCES QUEQUE.Proveedor(id_proveedor)
 );
+GO
 
 -- ============================================================
 -- MODULO COTIZACIONES Y PROPUESTAS
@@ -226,6 +243,7 @@ CREATE TABLE QUEQUE.SolicitudCotizacion (
     CONSTRAINT FK_Solicitud_Cliente          FOREIGN KEY (id_cliente) REFERENCES QUEQUE.Cliente(id_cliente),
     CONSTRAINT FK_Solicitud_Agente           FOREIGN KEY (id_agente)  REFERENCES QUEQUE.Agente(legajo)
 );
+GO
 
 CREATE TABLE QUEQUE.Ciudad_x_Solicitud (
     id_ciudad     BIGINT        NOT NULL,
@@ -236,6 +254,7 @@ CREATE TABLE QUEQUE.Ciudad_x_Solicitud (
     CONSTRAINT FK_CxS_Ciudad                 FOREIGN KEY (id_ciudad)     REFERENCES QUEQUE.Ciudad(id_ciudad),
     CONSTRAINT FK_CxS_Solicitud              FOREIGN KEY (nro_solicitud) REFERENCES QUEQUE.SolicitudCotizacion(nro_solicitud)
 );
+GO
 
 CREATE TABLE QUEQUE.Propuesta (
     id_propuesta         BIGINT        NOT NULL,
@@ -254,6 +273,7 @@ CREATE TABLE QUEQUE.Propuesta (
     CONSTRAINT FK_Propuesta_Agente       FOREIGN KEY (id_agente)     REFERENCES QUEQUE.Agente(legajo),
     CONSTRAINT FK_Propuesta_Estado       FOREIGN KEY (id_estado)     REFERENCES QUEQUE.EstadoPropuesta(id_estado)
 );
+GO
 
 CREATE TABLE QUEQUE.Propuesta_Vuelo (
     id_propuesta    BIGINT        NOT NULL,
@@ -265,6 +285,7 @@ CREATE TABLE QUEQUE.Propuesta_Vuelo (
     CONSTRAINT FK_PropVuelo_Propuesta     FOREIGN KEY (id_propuesta) REFERENCES QUEQUE.Propuesta(id_propuesta),
     CONSTRAINT FK_PropVuelo_Vuelo         FOREIGN KEY (id_vuelo)     REFERENCES QUEQUE.Vuelo(id_vuelo)
 );
+GO
 
 CREATE TABLE QUEQUE.Propuesta_Habitacion (
     id_propuesta  BIGINT        NOT NULL,
@@ -278,6 +299,7 @@ CREATE TABLE QUEQUE.Propuesta_Habitacion (
     CONSTRAINT FK_PropHabitacion_Propuesta  FOREIGN KEY (id_propuesta)  REFERENCES QUEQUE.Propuesta(id_propuesta),
     CONSTRAINT FK_PropHabitacion_Habitacion FOREIGN KEY (id_habitacion) REFERENCES QUEQUE.Habitacion(id_habitacion)
 );
+GO
 
 -- ============================================================
 -- MODULO VENTAS Y RESERVAS
@@ -301,6 +323,7 @@ CREATE TABLE QUEQUE.Venta (
     CONSTRAINT FK_Venta_Canal        FOREIGN KEY (id_canal)      REFERENCES QUEQUE.CanalVenta(id_canal),
     CONSTRAINT FK_Venta_MedioPago    FOREIGN KEY (id_medio_pago) REFERENCES QUEQUE.MedioPago(id_medio_pago)
 );
+GO
 
 CREATE TABLE QUEQUE.Venta_X_Propuesta (
     nro_venta    BIGINT NOT NULL,
@@ -309,6 +332,7 @@ CREATE TABLE QUEQUE.Venta_X_Propuesta (
     CONSTRAINT FK_VxP_Venta               FOREIGN KEY (nro_venta)    REFERENCES QUEQUE.Venta(nro_venta),
     CONSTRAINT FK_VxP_Propuesta           FOREIGN KEY (id_propuesta) REFERENCES QUEQUE.Propuesta(id_propuesta)
 );
+GO
 
 CREATE TABLE QUEQUE.Reserva_Vuelo (
     codigo_reserva    NVARCHAR(255) NOT NULL,
@@ -321,6 +345,7 @@ CREATE TABLE QUEQUE.Reserva_Vuelo (
     CONSTRAINT FK_ResVuelo_Venta      FOREIGN KEY (nro_venta) REFERENCES QUEQUE.Venta(nro_venta),
     CONSTRAINT FK_ResVuelo_Vuelo      FOREIGN KEY (id_vuelo)  REFERENCES QUEQUE.Vuelo(id_vuelo)
 );
+GO
 
 CREATE TABLE QUEQUE.Reserva_Habitacion (
     codigo_reserva NVARCHAR(255) NOT NULL,
@@ -335,6 +360,7 @@ CREATE TABLE QUEQUE.Reserva_Habitacion (
     CONSTRAINT FK_ResHabitacion_Venta        FOREIGN KEY (nro_venta)      REFERENCES QUEQUE.Venta(nro_venta),
     CONSTRAINT FK_ResHabitacion_Habitacion   FOREIGN KEY (id_habitacion)  REFERENCES QUEQUE.Habitacion(id_habitacion)
 );
+GO
 
 CREATE TABLE QUEQUE.Reserva_Excursion (
     codigo_reserva NVARCHAR(255) NOT NULL,
@@ -348,6 +374,7 @@ CREATE TABLE QUEQUE.Reserva_Excursion (
     CONSTRAINT FK_ResExcursion_Venta        FOREIGN KEY (nro_venta)    REFERENCES QUEQUE.Venta(nro_venta),
     CONSTRAINT FK_ResExcursion_Excursion    FOREIGN KEY (id_excursion) REFERENCES QUEQUE.Excursion(id_excursion)
 );
+GO
 
 -- ============================================================
 -- MODULO ENCUESTAS
@@ -363,12 +390,14 @@ CREATE TABLE QUEQUE.Encuesta (
     CONSTRAINT FK_Encuesta_Cliente  FOREIGN KEY (id_cliente) REFERENCES QUEQUE.Cliente(id_cliente),
     CONSTRAINT FK_Encuesta_Agente   FOREIGN KEY (id_agente)  REFERENCES QUEQUE.Agente(legajo)
 );
+GO
 
 CREATE TABLE QUEQUE.AspectoValorado (
     id_aspecto  BIGINT        IDENTITY(1,1) NOT NULL,
     descripcion NVARCHAR(255) NULL,
     CONSTRAINT PK_AspectoValorado PRIMARY KEY (id_aspecto)
 );
+GO
 
 CREATE TABLE QUEQUE.ValoracionEncuesta (
     id_encuesta BIGINT NOT NULL,
@@ -378,6 +407,7 @@ CREATE TABLE QUEQUE.ValoracionEncuesta (
     CONSTRAINT FK_Valoracion_Encuesta      FOREIGN KEY (id_encuesta) REFERENCES QUEQUE.Encuesta(id_encuesta),
     CONSTRAINT FK_Valoracion_Aspecto       FOREIGN KEY (id_aspecto)  REFERENCES QUEQUE.AspectoValorado(id_aspecto)
 );
+GO
 
 -- ============================================================
 -- MIGRACIONES
@@ -411,22 +441,22 @@ GO
 -- Esta alternativa deja los paises como estan, guardando una de las varias alternativas
 -- Si queremos acceder a esta tabla necesitamos hacer el mismo Collate a ambos lados del join para asegurarnos que se verifiquen con los mismos criterios
 -- Ej: JOIN [QUEQUE].[Pais] p ON m.[Aerolinea_Pais] COLLATE Latin1_General_CI_AI = p.[nombre] COLLATE Latin1_General_CI_AI
-CREATE PROCEDURE [QUEQUE].[Migrar_Paises2]
-AS
-BEGIN
-    SET NOCOUNT ON;
+-- CREATE PROCEDURE [QUEQUE].[Migrar_Paises2]
+-- AS
+-- BEGIN
+--     SET NOCOUNT ON;
 
-    INSERT INTO [QUEQUE].[Pais] (nombre)
-    SELECT [Aeropuerto_Salida_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
-    UNION
-    SELECT [Aeropuerto_Llegada_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
-    UNION
-    SELECT [Aerolinea_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
-    UNION
-    SELECT [Hospedaje_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
+--     INSERT INTO [QUEQUE].[Pais] (nombre)
+--     SELECT [Aeropuerto_Salida_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Salida_Pais] IS NOT NULL
+--     UNION
+--     SELECT [Aeropuerto_Llegada_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
+--     UNION
+--     SELECT [Aerolinea_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
+--     UNION
+--     SELECT [Hospedaje_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
 
-END;
-GO
+-- END;
+-- GO
 
 -- Migracion Paises Alternativa 3 -> mezclar las 2
 -- Guardo la tabla normalizada, pero para los joins hago el collate para no tener que andar modificando el string.
@@ -571,7 +601,6 @@ END;
 GO
 
 -- Migración de Agentes
-
 CREATE PROCEDURE [QUEQUE].[Migrar_Agentes]
 AS
 BEGIN
@@ -615,9 +644,46 @@ BEGIN
 END
 GO
 
--- Ejecuciones / Funciones Auxiliares / Testeo --
+-- ============================================================
+-- EJECUTAR PROCEDIMIENTOS DE MIGRACION
+-- ============================================================
+
+EXEC [QUEQUE].[Migrar_Paises];
+GO
+
+EXEC [QUEQUE].[Migrar_Ciudades];
+GO
+
+EXEC [QUEQUE].[Migrar_Alianzas];
+GO
+
+EXEC [QUEQUE].[Migrar_Provincia];
+GO
+
+EXEC [QUEQUE].[Migrar_Canal_Venta];
+GO
+
+EXEC [QUEQUE].[Migrar_Medio_Pago];
+GO
+
 EXEC [QUEQUE].[Migrar_Agencias];
 GO
 
-SELECT * FROM [QUEQUE].[Aerolinea];
-select distinct(Aerolinea_Codigo) from [gd_esquema].Maestra
+EXEC [QUEQUE].[Migrar_Aeropuerto];
+GO
+
+EXEC [QUEQUE].[Migrar_Aerolineas];
+GO
+
+EXEC [QUEQUE].[Migrar_Agentes];
+GO
+
+EXEC [QUEQUE].[Migrar_Clientes];
+GO
+
+-- ============================================================
+-- Queries de prueba
+-- ============================================================
+
+SELECT count(distinct(dni)) FROM [QUEQUE].[Cliente];
+select count(distinct(Cliente_Dni)) from [gd_esquema].Maestra
