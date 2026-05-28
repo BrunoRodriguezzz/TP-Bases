@@ -75,6 +75,8 @@ CREATE TABLE QUEQUE.Cliente (
     nombre           NVARCHAR(255) NULL,
     apellido         NVARCHAR(255) NULL,
     dni              NVARCHAR(255) NULL,
+    telefono         NVARCHAR(255) NULL,
+    mail             NVARCHAR(255) NULL,
     direccion        NVARCHAR(255) NULL,
     localidad        NVARCHAR(255) NULL,
     provincia        BIGINT        NULL,
@@ -409,7 +411,7 @@ GO
 -- Esta alternativa deja los paises como estan, guardando una de las varias alternativas
 -- Si queremos acceder a esta tabla necesitamos hacer el mismo Collate a ambos lados del join para asegurarnos que se verifiquen con los mismos criterios
 -- Ej: JOIN [QUEQUE].[Pais] p ON m.[Aerolinea_Pais] COLLATE Latin1_General_CI_AI = p.[nombre] COLLATE Latin1_General_CI_AI
-CREATE PROCEDURE [QUEQUE].[Migrar_Paises]
+CREATE PROCEDURE [QUEQUE].[Migrar_Paises2]
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -419,9 +421,9 @@ BEGIN
     UNION
     SELECT [Aeropuerto_Llegada_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aeropuerto_Llegada_Pais] IS NOT NULL
     UNION
-    SELECT [Aerolinea_Pais]          COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
+    SELECT [Aerolinea_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Aerolinea_Pais] IS NOT NULL
     UNION
-    SELECT [Hospedaje_Pais]          COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
+    SELECT [Hospedaje_Pais] COLLATE Latin1_General_CI_AI FROM [GD1C2026].[gd_esquema].[Maestra] WHERE [Hospedaje_Pais] IS NOT NULL;
 
 END;
 GO
@@ -462,6 +464,7 @@ BEGIN
 END;
 GO
 
+-- Migracion Provincias
 CREATE PROCEDURE [QUEQUE].[Migrar_Provincia]
 AS
 BEGIN
@@ -592,8 +595,27 @@ BEGIN
 END
 GO
 
+-- Migracion Clientes
+CREATE PROCEDURE [QUEQUE].[Migrar_Clientes]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Cliente (nombre, apellido, dni, telefono, mail, direccion, localidad, provincia, fecha_nacimiento)
+    SELECT DISTINCT
+        Cliente_Nombre,
+        Cliente_Apellido,
+        Cliente_Dni,
+        Cliente_Tel,
+        Cliente_Mail,
+        Cliente_Direccion,
+        Cliente_Localidad,
+        id_provincia,
+        Cliente_Fecha_Nac
+    FROM [GD1C2026].[gd_esquema].[Maestra]
+    INNER JOIN QUEQUE.Provincia ON prov_nombre = Cliente_Provincia
+END
+GO
 
--- Ejecuciones / Funciones Auxiliares / Testeo
+-- Ejecuciones / Funciones Auxiliares / Testeo --
 EXEC [QUEQUE].[Migrar_Agencias];
 GO
 

@@ -29,7 +29,7 @@
 - [x] Aerolinea
 - [x] Aeropuerto
 - [x] Agente
-- [ ] Cliente
+- [x] Cliente
 - [ ] Hospedaje
 - [ ] Habitacion
 - [ ] Proveedor
