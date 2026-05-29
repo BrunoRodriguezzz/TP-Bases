@@ -999,8 +999,8 @@ BEGIN
         m.Detalle_Propuesta_Hospedaje_Fecha_Desde,
         m.Detalle_Propuesta_Hospedaje_Fecha_Hasta,
         m.Detalle_Propuesta_Hospedaje_Cant,
-        m.Detalle_Propuesta_Vuelo_Subtotal,
-        m.Detalle_Propuesta_Vuelo_Precio
+        m.Detalle_Propuesta_Hospedaje_Subtotal,
+        m.Detalle_Propuesta_Hospedaje_Precio
     FROM [GD1C2026].[gd_esquema].[Maestra] m
     INNER JOIN QUEQUE.Hospedaje HOS ON HOS.nombre = m.[Hospedaje_Nombre]
                                    AND HOS.direccion = m.[Hospedaje_Direccion]
