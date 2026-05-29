@@ -39,10 +39,10 @@
 - [x] Ciudad_x_Solicitud
 - [x] Propuesta
 - [x] EstadoPropuesta
-- [ ] Propuesta_Vuelo
-- [ ] Propuesta_Habitacion
+- [x] Propuesta_Vuelo
+- [x] Propuesta_Habitacion
 - [x] Venta
-- [ ] Venta_X_Propuesta
+- [x] Venta_X_Propuesta
 - [x] Reserva_Vuelo
 - [x] Reserva_Habitacion
 - [x] Reserva_Excursion

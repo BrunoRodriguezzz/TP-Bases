@@ -949,7 +949,6 @@ END
 GO
 
 -- Migración ValoracionEncuesta
-
 CREATE PROCEDURE [QUEQUE].[Migrar_ValoracionEncuesta]
 AS
 BEGIN
@@ -966,6 +965,66 @@ BEGIN
     AND m.Aspecto_Aspecto IS NOT NULL;
 END
 GO
+
+-- Migración Propuesta Vuelo
+CREATE PROCEDURE [QUEQUE].[Migrar_Propuesta_Vuelo]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Propuesta_Vuelo (id_propuesta, id_vuelo, cantidad, precio_unitario, subtotal)
+    SELECT DISTINCT
+        m.Propuesta_Nro_Propuesta,
+        v.id_vuelo,
+        m.Detalle_Propuesta_Vuelo_Cant_Pasajes,
+        m.Detalle_Propuesta_Vuelo_Precio,
+        m.Detalle_Propuesta_Vuelo_Subtotal
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    JOIN QUEQUE.Vuelo v ON v.id_aerolinea = m.[Aerolinea_Codigo]
+                       AND v.id_aeropuerto_origen = m.[Aeropuerto_Salida_Codigo]
+                       AND v.id_aeropuerto_destino = m.[Aeropuerto_Llegada_Codigo]
+                       AND v.fecha_salida = m.[Vuelo_Fecha_Salida]
+                       AND v.horario_salida = m.[Vuelo_Horario_Salida]
+    WHERE m.Propuesta_Nro_Propuesta IS NOT NULL 
+      AND m.Detalle_Propuesta_Vuelo_Cant_Pasajes IS NOT NULL;
+END
+GO
+
+-- Migración Propuesta Habitación
+CREATE PROCEDURE [QUEQUE].[Migrar_Propuesta_Habitación]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Propuesta_Habitacion (id_propuesta, id_habitacion, fecha_desde, fecha_hasta, cantidad, subtotal, precio)
+    SELECT DISTINCT
+        m.Propuesta_Nro_Propuesta,
+        HAB.id_habitacion,
+        m.Detalle_Propuesta_Hospedaje_Fecha_Desde,
+        m.Detalle_Propuesta_Hospedaje_Fecha_Hasta,
+        m.Detalle_Propuesta_Hospedaje_Cant,
+        m.Detalle_Propuesta_Vuelo_Subtotal,
+        m.Detalle_Propuesta_Vuelo_Precio
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    INNER JOIN QUEQUE.Hospedaje HOS ON HOS.nombre = m.[Hospedaje_Nombre]
+                                   AND HOS.direccion = m.[Hospedaje_Direccion]
+    INNER JOIN QUEQUE.Habitacion HAB ON HAB.id_hospedaje = HOS.id_hospedaje
+                                  AND HAB.nombre = m.[Habitacion_Nombre]
+    WHERE m.Propuesta_Nro_Propuesta IS NOT NULL
+        AND m.Detalle_Propuesta_Hospedaje_Cant IS NOT NULL
+END
+GO
+
+-- Migración Venta x Propuesta
+CREATE PROCEDURE [QUEQUE].[Migrar_Venta_X_Propuesta]
+AS
+BEGIN
+    INSERT INTO QUEQUE.Venta_X_Propuesta (id_propuesta, nro_venta)
+    SELECT DISTINCT
+        m.Propuesta_Nro_Propuesta,
+        m.Venta_Nro_Venta
+    FROM [GD1C2026].[gd_esquema].[Maestra] m
+    WHERE m.Propuesta_Nro_Propuesta IS NOT NULL
+        AND m.Venta_Nro_Venta IS NOT NULL
+END
+GO
+
 -- ============================================================
 -- EJECUTAR PROCEDIMIENTOS DE MIGRACION
 -- ============================================================
@@ -1049,6 +1108,15 @@ EXEC [QUEQUE].[Migrar_Encuestas]
 GO
 
 EXEC [QUEQUE].[Migrar_ValoracionEncuesta]
+GO
+
+EXEC [QUEQUE].[Migrar_Propuesta_Vuelo]
+GO
+
+EXEC [QUEQUE].[Migrar_Propuesta_Habitación]
+GO
+
+EXEC [QUEQUE].[Migrar_Venta_X_Propuesta]
 GO
 
 -- -- ============================================================
