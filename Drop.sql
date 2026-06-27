@@ -2,6 +2,22 @@
 -- DROP SCHEMA QUEQUE (sin tocar dbo.TablaMaestra)
 -- ============================================================
 
+-- Modelo de BI
+DELETE FROM Hecho_Valoracion_Encuesta;
+DELETE FROM Hecho_Propuesta;
+DELETE FROM Hecho_Solicitud;
+DELETE FROM Hecho_Venta;
+DELETE FROM DIM_RangoEAgente;
+DELETE FROM DIM_RangoECliente;
+DELETE FROM DIM_Tiempo;
+DELETE FROM DIM_Temporada;
+DELETE FROM DIM_TipoServicio;
+DELETE FROM DIM_CanalVenta;
+DELETE FROM DIM_Aspecto;
+DELETE FROM DIM_EstadoPropuesta;
+GO
+
+
 -- Procedures
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Paises;
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Provincia;

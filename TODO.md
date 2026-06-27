@@ -2,6 +2,9 @@
 
 # ENTREGA 2
 
+USAR DATEPART :-|
+
+
 ## Migrar datos
 - [ ] DIM_RangoEAgente
 - [ ] DIM_RangoECliente
