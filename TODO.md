@@ -1,5 +1,33 @@
 # Entidades migradadas
 
+# ENTREGA 2
+
+## Migrar datos
+- [ ] DIM_RangoEAgente
+- [ ] DIM_RangoECliente
+- [ ] DIM_Tiempo
+- [ ] DIM_Temporado
+- [ ] DIM_TipoServicio
+- [ ] DIM_CanalVenta
+- [ ] DIM_Aspecto
+- [ ] DIM_EstadoPropuesta
+- [ ] Hecho_Valoracion_Encuesta
+- [ ] Hecho_Propuesta
+- [ ] Hecho_Solicitud
+- [ ] Hecho_Venta
+
+## Armar vistas
+- [ ] Ticket promedio
+- [ ] Distribución de Facturación
+- [ ] Ranking de solicitudes por temporada
+- [ ] Anticipación promedio solicitudes
+- [ ] Tasa de aceptación de propuestas
+- [ ] Cotización promedio por temporada
+- [ ] Tiempo promedio de respuesta
+- [ ] Desvío de presupuesto
+- [ ] Ranking de aspectos mejor y peor valorados
+- [ ] Satisfacción promedio por agente
+
 # Orden sugerido y dependencias
 
 1. Pais

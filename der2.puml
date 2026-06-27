@@ -1,0 +1,142 @@
+     @startuml ModeloEstrella
+hide circle
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+' ==============================
+' DIMENSIONES
+' ==============================
+
+entity "DIM_RangoEAgente" as DIM_RangoEAgente {
+  ID : int <<PK>>
+  --
+  desde : int
+  hasta : int
+}
+
+entity "DIM_RangoECliente" as DIM_RangoECliente {
+  ID : int <<PK>>
+  --
+  desde : int
+  hasta : int
+}
+
+entity "DIM_Tiempo" as DIM_Tiempo {
+  ID : int <<PK>>
+  --
+  Año : int
+  Cuatrimestre : int
+  Mes : int
+}
+
+entity "DIM_Temporada" as DIM_Temporada {
+  ID : int <<PK>>
+  --
+  descripcion : varchar(255)
+  desde_mes : int
+  hasta_mes : int
+}
+
+entity "DIM_TipoServicio" as DIM_TipoServicio {
+  ID : int <<PK>>
+  --
+  descripcion : nvarchar(50)
+}
+
+entity "DIM_CanalVenta" as DIM_CanalVenta {
+  id_canal : bigint <<PK>>
+  --
+  Descripcion : varchar(255)
+}
+
+entity "DIM_Aspecto" as DIM_Aspecto {
+  id_aspecto : bigint <<PK>>
+  --
+  Descripcion : varchar(255)
+}
+
+entity "DIM_EstadoPropuesta" as DIM_EstadoPropuesta {
+  id_estado : bigint <<PK>>
+  --
+  Descripcion : varchar(255)
+}
+
+' ==============================
+' TABLAS DE HECHOS
+' ==============================
+
+entity "Hecho_Valoracion_Encuesta" as Hecho_Valoracion_Encuesta {
+  id_encuesta : bigint <<PK>>
+  Tiempo : int <<PK, FK>>
+  Aspecto : bigint <<PK, FK>>
+  --
+  RangoEtarioAgente : int <<FK>>
+  Puntaje : int
+}
+
+entity "Hecho_Propuesta" as Hecho_Propuesta {
+  id_propuesta : bigint <<PK>>
+  --
+  Tiempo : int <<FK>>
+  RangoEtarioAgente : int <<FK>>
+  Temporada : int <<FK>>
+  EstadoPropuesta : bigint <<FK>>
+  importe_total : decimal(18,2)
+  tiempo_respuesta : int
+  desvio_presupuesto : decimal(18,2)
+}
+
+entity "Hecho_Solicitud" as Hecho_Solicitud {
+  id_solicitud : bigint <<PK>>
+  --
+  Tiempo : int <<FK>>
+  RangoEtarioAgente : int <<FK>>
+  RangoEtarioCliente : int <<FK>>
+  Temporada : int <<FK>>
+  fecha_solicitud : date
+  fecha_inicio_tentativa : date
+}
+
+entity "Hecho_Venta" as Hecho_Venta {
+  id_venta : bigint <<PK>>
+  TipoServicio : int <<PK, FK>>
+  --
+  Tiempo : int <<FK>>
+  RangoEtarioAgente : int <<FK>>
+  RangoEtarioCliente : int <<FK>>
+  Temporada : int <<FK>>
+  CanalVenta : bigint <<FK>>
+  importe_total : decimal(18,2)
+}
+
+' ==============================
+' RELACIONES
+' ==============================
+
+' Relaciones con Hecho_Valoracion_Encuesta
+DIM_Tiempo ||--o{ Hecho_Valoracion_Encuesta
+DIM_Aspecto ||--o{ Hecho_Valoracion_Encuesta
+DIM_RangoEAgente ||--o{ Hecho_Valoracion_Encuesta
+
+' Relaciones con Hecho_Propuesta
+DIM_Tiempo ||--o{ Hecho_Propuesta
+DIM_RangoEAgente ||--o{ Hecho_Propuesta
+DIM_Temporada ||--o{ Hecho_Propuesta
+DIM_EstadoPropuesta ||--o{ Hecho_Propuesta
+
+' Relaciones con Hecho_Solicitud
+DIM_Tiempo ||--o{ Hecho_Solicitud
+DIM_RangoEAgente ||--o{ Hecho_Solicitud
+DIM_RangoECliente ||--o{ Hecho_Solicitud
+DIM_Temporada ||--o{ Hecho_Solicitud
+
+' Relaciones con Hecho_Venta
+DIM_Tiempo ||--o{ Hecho_Venta
+DIM_RangoEAgente ||--o{ Hecho_Venta
+DIM_RangoECliente ||--o{ Hecho_Venta
+DIM_Temporada ||--o{ Hecho_Venta
+DIM_CanalVenta ||--o{ Hecho_Venta
+DIM_TipoServicio ||--o{ Hecho_Venta
+
+@enduml
