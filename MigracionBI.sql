@@ -340,3 +340,4 @@ UNION ALL
 SELECT 'Venta', COUNT(*), (SELECT COUNT(*) FROM Hecho_Venta) FROM QUEQUE.Venta
 UNION ALL
 SELECT 'ValoracionEncuesta', COUNT(*), (SELECT COUNT(*) FROM Hecho_Valoracion_Encuesta) FROM QUEQUE.ValoracionEncuesta;
+GO

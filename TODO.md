@@ -4,20 +4,22 @@
 
 USAR DATEPART :-|
 
+Poner prefijo BI a todas las tablas
+
 
 ## Migrar datos
-- [ ] DIM_RangoEAgente
-- [ ] DIM_RangoECliente
-- [ ] DIM_Tiempo
-- [ ] DIM_Temporado
-- [ ] DIM_TipoServicio
-- [ ] DIM_CanalVenta
-- [ ] DIM_Aspecto
-- [ ] DIM_EstadoPropuesta
-- [ ] Hecho_Valoracion_Encuesta
-- [ ] Hecho_Propuesta
-- [ ] Hecho_Solicitud
-- [ ] Hecho_Venta
+- [ x ] DIM_RangoEAgente
+- [ x ] DIM_RangoECliente
+- [ x ] DIM_Tiempo
+- [ x ] DIM_Temporado
+- [ x ] DIM_TipoServicio
+- [ x ] DIM_CanalVenta
+- [ x ] DIM_Aspecto
+- [ x ] DIM_EstadoPropuesta
+- [ x ] Hecho_Valoracion_Encuesta
+- [ x ] Hecho_Propuesta
+- [ x ] Hecho_Solicitud
+- [ x ] Hecho_Venta
 
 ## Armar vistas
 - [ ] Ticket promedio

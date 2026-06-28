@@ -2,6 +2,12 @@
 -- DROP SCHEMA QUEQUE (sin tocar dbo.TablaMaestra)
 -- ============================================================
 
+-- Vistas
+
+IF OBJECT_ID('BI_SatisfaccionPromedioPorAgente', 'V') IS NOT NULL
+    DROP VIEW BI_SatisfaccionPromedioPorAgente;
+GO
+
 -- Modelo de BI
 DELETE FROM Hecho_Valoracion_Encuesta;
 DELETE FROM Hecho_Propuesta;
@@ -16,7 +22,6 @@ DELETE FROM DIM_CanalVenta;
 DELETE FROM DIM_Aspecto;
 DELETE FROM DIM_EstadoPropuesta;
 GO
-
 
 -- Procedures
 DROP PROCEDURE IF EXISTS QUEQUE.Migrar_Paises;
