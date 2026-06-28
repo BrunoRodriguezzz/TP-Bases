@@ -267,7 +267,7 @@ INSERT INTO Hecho_Propuesta (
 )
 SELECT
     p.id_propuesta,
-    YEAR(p.fecha_emision) * 10000 + MONTH(p.fecha_emision) * 100 + DAY(p.fecha_emision) AS Tiempo,
+    YEAR(p.fecha_emision) * 10000 + MONTH(p.fecha_emision) * 100 + DATEPART(QUARTER,p.fecha_emision) AS Tiempo,
     dbo.fn_RangoEtarioAgente(dbo.fn_CalcularEdad(ag.fecha_nacimiento, p.fecha_emision))  AS RangoEtarioAgente,
     dbo.fn_Temporada(MONTH(p.fecha_desde))                                               AS Temporada,
     p.id_estado                                                                          AS EstadoPropuesta,
@@ -287,7 +287,7 @@ INSERT INTO Hecho_Solicitud (
 )
 SELECT
     s.nro_solicitud,
-    YEAR(s.fecha_solicitud) * 10000 + MONTH(s.fecha_solicitud) * 100 + DAY(s.fecha_solicitud) AS Tiempo,
+    YEAR(s.fecha_solicitud) * 10000 + MONTH(s.fecha_solicitud) * 100 + DATEPART(QUARTER,s.fecha_solicitud) AS Tiempo,
     dbo.fn_RangoEtarioAgente(dbo.fn_CalcularEdad(ag.fecha_nacimiento, s.fecha_solicitud))      AS RangoEtarioAgente,
     dbo.fn_RangoEtarioCliente(dbo.fn_CalcularEdad(c.fecha_nacimiento, s.fecha_solicitud))      AS RangoEtarioCliente,
     dbo.fn_Temporada(MONTH(s.fecha_inicio_tentativa))                                          AS Temporada,
@@ -307,7 +307,7 @@ INSERT INTO Hecho_Venta (
 )
 SELECT
     v.nro_venta,
-    YEAR(v.fecha_venta) * 10000 + MONTH(v.fecha_venta) * 100 + DAY(v.fecha_venta)       AS Tiempo,
+    YEAR(v.fecha_venta) * 10000 + MONTH(v.fecha_venta) * 100 + DATEPART(QUARTER,v.fecha_venta)       AS Tiempo,
     dbo.fn_RangoEtarioAgente(dbo.fn_CalcularEdad(ag.fecha_nacimiento, v.fecha_venta))    AS RangoEtarioAgente,
     dbo.fn_RangoEtarioCliente(dbo.fn_CalcularEdad(c.fecha_nacimiento, v.fecha_venta))    AS RangoEtarioCliente,
     dbo.fn_Temporada(MONTH(v.fecha_venta))                                               AS Temporada,
