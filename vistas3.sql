@@ -26,7 +26,6 @@ SELECT
     t.Cuatrimestre,
     ts.descripcion AS Tipo_Servicio,
     SUM(v.importe_total) AS Facturacion_Absoluta,
-    -- Calculamos el % dividiendo el total del servicio por el gran total del cuatrimestre
     str(SUM(v.importe_total) * 100 /(SELECT SUM(v2.importe_total)FROM Hecho_Venta v2 JOIN DIM_Tiempo t2 ON v2.Tiempo = t2.ID WHERE t2.Año = t.Año AND t2.Cuatrimestre = t.Cuatrimestre),15,2) AS Porcentaje_Facturacion
 FROM Hecho_Venta v
 JOIN DIM_Tiempo t ON v.Tiempo = t.ID
