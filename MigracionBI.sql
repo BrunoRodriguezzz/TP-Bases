@@ -63,9 +63,9 @@ CREATE TABLE BI_Hecho_Valoracion_Encuesta (
     RangoEtarioAgente int,
     Puntaje           int,
     CONSTRAINT PK_Hecho_Valoracion_Encuesta PRIMARY KEY (id_encuesta, Aspecto),
-    FOREIGN KEY (Tiempo)            REFERENCES DIM_Tiempo(ID),
-    FOREIGN KEY (Aspecto)           REFERENCES DIM_Aspecto(id_aspecto),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES DIM_RangoEAgente(ID)
+    FOREIGN KEY (Tiempo)            REFERENCES BI_DIM_Tiempo(ID),
+    FOREIGN KEY (Aspecto)           REFERENCES BI_DIM_Aspecto(id_aspecto),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID)
 );
 GO
 
@@ -80,10 +80,10 @@ CREATE TABLE BI_Hecho_Propuesta (
     importe_total decimal(18,2),
     tiempo_respuesta_dias int, 
     desvio_presupuesto decimal(18,2),
-    FOREIGN KEY (Tiempo) REFERENCES DIM_Tiempo(ID),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES DIM_RangoEAgente(ID),
-    FOREIGN KEY (Temporada) REFERENCES DIM_Temporada(ID),
-    FOREIGN KEY (EstadoPropuesta) REFERENCES DIM_EstadoPropuesta(id_estado)
+    FOREIGN KEY (Tiempo) REFERENCES BI_DIM_Tiempo(ID),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID),
+    FOREIGN KEY (Temporada) REFERENCES BI_DIM_Temporada(ID),
+    FOREIGN KEY (EstadoPropuesta) REFERENCES BI_DIM_EstadoPropuesta(id_estado)
 );
 
 CREATE TABLE BI_Hecho_Solicitud (
@@ -94,10 +94,10 @@ CREATE TABLE BI_Hecho_Solicitud (
     Temporada int,
     fecha_solicitud date,
     fecha_inicio_tentativa date,
-    FOREIGN KEY (Tiempo) REFERENCES DIM_Tiempo(ID),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES DIM_RangoEAgente(ID),
-    FOREIGN KEY (RangoEtarioCliente) REFERENCES DIM_RangoECliente(ID),
-    FOREIGN KEY (Temporada) REFERENCES DIM_Temporada(ID)
+    FOREIGN KEY (Tiempo) REFERENCES BI_DIM_Tiempo(ID),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID),
+    FOREIGN KEY (RangoEtarioCliente) REFERENCES BI_DIM_RangoECliente(ID),
+    FOREIGN KEY (Temporada) REFERENCES BI_DIM_Temporada(ID)
 );
 
 CREATE TABLE BI_Hecho_Venta (
@@ -109,12 +109,12 @@ CREATE TABLE BI_Hecho_Venta (
     CanalVenta bigint,
     TipoServicio int,
     importe_total decimal(18,2),
-    FOREIGN KEY (Tiempo) REFERENCES DIM_Tiempo(ID),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES DIM_RangoEAgente(ID),
-    FOREIGN KEY (RangoEtarioCliente) REFERENCES DIM_RangoECliente(ID),
-    FOREIGN KEY (Temporada) REFERENCES DIM_Temporada(ID),
-    FOREIGN KEY (CanalVenta) REFERENCES DIM_CanalVenta(id_canal),
-    FOREIGN KEY (TipoServicio) REFERENCES DIM_TipoServicio(ID)
+    FOREIGN KEY (Tiempo) REFERENCES BI_DIM_Tiempo(ID),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID),
+    FOREIGN KEY (RangoEtarioCliente) REFERENCES BI_DIM_RangoECliente(ID),
+    FOREIGN KEY (Temporada) REFERENCES BI_DIM_Temporada(ID),
+    FOREIGN KEY (CanalVenta) REFERENCES BI_DIM_CanalVenta(id_canal),
+    FOREIGN KEY (TipoServicio) REFERENCES BI_DIM_TipoServicio(ID)
 );
 
 -- ============================================================
@@ -316,7 +316,7 @@ SELECT
     dbo.fn_Temporada(MONTH(v.fecha_venta))                                               AS Temporada,
     v.id_canal                                                                           AS CanalVenta,
     (
-        SELECT ID FROM DIM_TipoServicio
+        SELECT ID FROM BI_DIM_TipoServicio
         WHERE descripcion = CASE
             WHEN EXISTS (
                 SELECT 1 FROM QUEQUE.Venta_X_Propuesta vxp WHERE vxp.nro_venta = v.nro_venta
@@ -331,19 +331,7 @@ JOIN QUEQUE.Cliente c  ON c.id_cliente = v.id_cliente
 WHERE v.fecha_venta IS NOT NULL;
 GO
 
--- ============================================================
--- 4) CONTROL RAPIDO (opcional, para verificar que no haya quedado nada afuera)
--- ============================================================
-SELECT 'SolicitudCotizacion' AS Tabla, COUNT(*) AS Origen,
-       (SELECT COUNT(*) FROM BI_Hecho_Solicitud) AS Migrado
-FROM QUEQUE.SolicitudCotizacion
-UNION ALL
-SELECT 'Propuesta', COUNT(*), (SELECT COUNT(*) FROM Hecho_Propuesta) FROM QUEQUE.Propuesta
-UNION ALL
-SELECT 'Venta', COUNT(*), (SELECT COUNT(*) FROM Hecho_Venta) FROM QUEQUE.Venta
-UNION ALL
-SELECT 'ValoracionEncuesta', COUNT(*), (SELECT COUNT(*) FROM Hecho_Valoracion_Encuesta) FROM QUEQUE.ValoracionEncuesta;
-GO
+
 
 -- Vista 1
 
@@ -427,18 +415,18 @@ GO
 
 CREATE VIEW BI_Tiempo_promedio_de_respuesta AS
 SELECT
-    h.RangoEtarioAgente, t.Mes,
-    AVG(h.tiempo_respuesta_dias) promedio_tiempo_respuesta
+    h.RangoEtarioAgente, t.Año, t.Mes,
+    AVG(h.tiempo_respuesta_dias) AS promedio_tiempo_respuesta
 FROM BI_Hecho_Propuesta h
-JOIN BI_DIM_Tiempo t on h.Tiempo = t.ID
-GROUP BY h.RangoEtarioAgente, t.Mes
+JOIN BI_DIM_Tiempo t ON h.Tiempo = t.ID
+GROUP BY h.RangoEtarioAgente, t.Año, t.Mes
 GO
 
 -- Vista 8
 
 CREATE VIEW BI_Desvio_de_presupuesto AS
 SELECT
-    AVG(h.desvio_presupuesto) promedio_desvio_presupuesto
+    AVG(h.desvio_presupuesto) AS promedio_desvio_presupuesto
 FROM BI_Hecho_Propuesta h
 GO
 
@@ -446,20 +434,34 @@ GO
 
 CREATE VIEW BI_Ranking_de_aspectos_mejor_y_peor_valorados AS
 SELECT
-    h.Aspecto, t.Cuatrimestre,
-    AVG(h.Puntaje) promedio_puntaje
+    h.Aspecto, t.Año, t.Cuatrimestre,
+    AVG(h.Puntaje) AS promedio_puntaje
 FROM BI_Hecho_Valoracion_Encuesta h
 JOIN BI_DIM_Tiempo t on t.ID = h.Tiempo
-GROUP BY h.Aspecto, t.Cuatrimestre
+GROUP BY h.Aspecto, t.Año, t.Cuatrimestre
 GO
 
 --Vista 10
 
 CREATE VIEW BI_SatisfaccionPromedioPorAgente AS
 SELECT 
-    h.RangoEtarioAgente, t.Mes,
+    h.RangoEtarioAgente, t.Año, t.Mes,
     AVG(h.Puntaje) promedio_puntaje
 FROM BI_Hecho_Valoracion_Encuesta h
 JOIN BI_DIM_Tiempo t on h.Tiempo = t.ID
-GROUP BY h.RangoEtarioAgente, t.Mes
+GROUP BY h.RangoEtarioAgente, t.Año, t.Mes
+GO
+
+-- ============================================================
+-- 4) CONTROL RAPIDO (opcional, para verificar que no haya quedado nada afuera)
+-- ============================================================
+SELECT 'SolicitudCotizacion' AS Tabla, COUNT(*) AS Origen,
+       (SELECT COUNT(*) FROM BI_Hecho_Solicitud) AS Migrado
+FROM QUEQUE.SolicitudCotizacion
+UNION ALL
+SELECT 'Propuesta', COUNT(*), (SELECT COUNT(*) FROM BI_Hecho_Propuesta) FROM QUEQUE.Propuesta
+UNION ALL
+SELECT 'Venta', COUNT(*), (SELECT COUNT(*) FROM BI_Hecho_Venta) FROM QUEQUE.Venta
+UNION ALL
+SELECT 'ValoracionEncuesta', COUNT(*), (SELECT COUNT(*) FROM BI_Hecho_Valoracion_Encuesta) FROM QUEQUE.ValoracionEncuesta;
 GO
