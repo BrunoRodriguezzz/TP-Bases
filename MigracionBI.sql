@@ -63,9 +63,9 @@ CREATE TABLE QUEQUE.BI_Hecho_Valoracion_Encuesta (
     RangoEtarioAgente int,
     Puntaje           int,
     CONSTRAINT PK_Hecho_Valoracion_Encuesta PRIMARY KEY (id_encuesta, Aspecto),
-    FOREIGN KEY (Tiempo)            REFERENCES BI_DIM_Tiempo(ID),
-    FOREIGN KEY (Aspecto)           REFERENCES BI_DIM_Aspecto(id_aspecto),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID)
+    FOREIGN KEY (Tiempo)            REFERENCES QUEQUE.BI_DIM_Tiempo(ID),
+    FOREIGN KEY (Aspecto)           REFERENCES QUEQUE.BI_DIM_Aspecto(id_aspecto),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES QUEQUE.BI_DIM_RangoEAgente(ID)
 );
 GO
 
@@ -80,10 +80,10 @@ CREATE TABLE QUEQUE.BI_Hecho_Propuesta (
     importe_total decimal(18,2),
     tiempo_respuesta_dias int, 
     desvio_presupuesto decimal(18,2),
-    FOREIGN KEY (Tiempo) REFERENCES BI_DIM_Tiempo(ID),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID),
-    FOREIGN KEY (Temporada) REFERENCES BI_DIM_Temporada(ID),
-    FOREIGN KEY (EstadoPropuesta) REFERENCES BI_DIM_EstadoPropuesta(id_estado)
+    FOREIGN KEY (Tiempo) REFERENCES QUEQUE.BI_DIM_Tiempo(ID),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES QUEQUE.BI_DIM_RangoEAgente(ID),
+    FOREIGN KEY (Temporada) REFERENCES QUEQUE.BI_DIM_Temporada(ID),
+    FOREIGN KEY (EstadoPropuesta) REFERENCES QUEQUE.BI_DIM_EstadoPropuesta(id_estado)
 );
 
 CREATE TABLE QUEQUE.BI_Hecho_Solicitud (
@@ -94,10 +94,10 @@ CREATE TABLE QUEQUE.BI_Hecho_Solicitud (
     Temporada int,
     fecha_solicitud date,
     fecha_inicio_tentativa date,
-    FOREIGN KEY (Tiempo) REFERENCES BI_DIM_Tiempo(ID),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID),
-    FOREIGN KEY (RangoEtarioCliente) REFERENCES BI_DIM_RangoECliente(ID),
-    FOREIGN KEY (Temporada) REFERENCES BI_DIM_Temporada(ID)
+    FOREIGN KEY (Tiempo) REFERENCES QUEQUE.BI_DIM_Tiempo(ID),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES QUEQUE.BI_DIM_RangoEAgente(ID),
+    FOREIGN KEY (RangoEtarioCliente) REFERENCES QUEQUE.BI_DIM_RangoECliente(ID),
+    FOREIGN KEY (Temporada) REFERENCES QUEQUE.BI_DIM_Temporada(ID)
 );
 
 CREATE TABLE QUEQUE.BI_Hecho_Venta (
@@ -109,12 +109,12 @@ CREATE TABLE QUEQUE.BI_Hecho_Venta (
     CanalVenta bigint,
     TipoServicio int,
     importe_total decimal(18,2),
-    FOREIGN KEY (Tiempo) REFERENCES BI_DIM_Tiempo(ID),
-    FOREIGN KEY (RangoEtarioAgente) REFERENCES BI_DIM_RangoEAgente(ID),
-    FOREIGN KEY (RangoEtarioCliente) REFERENCES BI_DIM_RangoECliente(ID),
-    FOREIGN KEY (Temporada) REFERENCES BI_DIM_Temporada(ID),
-    FOREIGN KEY (CanalVenta) REFERENCES BI_DIM_CanalVenta(id_canal),
-    FOREIGN KEY (TipoServicio) REFERENCES BI_DIM_TipoServicio(ID)
+    FOREIGN KEY (Tiempo) REFERENCES QUEQUE.BI_DIM_Tiempo(ID),
+    FOREIGN KEY (RangoEtarioAgente) REFERENCES QUEQUE.BI_DIM_RangoEAgente(ID),
+    FOREIGN KEY (RangoEtarioCliente) REFERENCES QUEQUE.BI_DIM_RangoECliente(ID),
+    FOREIGN KEY (Temporada) REFERENCES QUEQUE.BI_DIM_Temporada(ID),
+    FOREIGN KEY (CanalVenta) REFERENCES QUEQUE.BI_DIM_CanalVenta(id_canal),
+    FOREIGN KEY (TipoServicio) REFERENCES QUEQUE.BI_DIM_TipoServicio(ID)
 );
 GO
 -- ============================================================
