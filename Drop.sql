@@ -7,44 +7,49 @@ GO
 
 -- Drop BI
 
-IF OBJECT_ID('BI_Ticket_Promedio','V') IS NOT NULL DROP VIEW BI_Ticket_Promedio;
-IF OBJECT_ID('BI_Distribucion_Facturacion','V') IS NOT NULL DROP VIEW BI_Distribucion_Facturacion;
-IF OBJECT_ID('BI_Ranking_Solicitudes_Temporada','V') IS NOT NULL DROP VIEW BI_Ranking_Solicitudes_Temporada;
-IF OBJECT_ID('BI_Anticipacion_Promedio_Solicitudes','V') IS NOT NULL DROP VIEW BI_Anticipacion_Promedio_Solicitudes;
-IF OBJECT_ID('BI_Tasa_Aceptacion_Propuestas','V') IS NOT NULL DROP VIEW BI_Tasa_Aceptacion_Propuestas;
-IF OBJECT_ID('BI_Cotizacion_Promedio_Temporada','V') IS NOT NULL DROP VIEW BI_Cotizacion_Promedio_Temporada;
-IF OBJECT_ID('BI_Tiempo_promedio_de_respuesta','V') IS NOT NULL DROP VIEW BI_Tiempo_promedio_de_respuesta;
-IF OBJECT_ID('BI_Desvio_de_presupuesto','V') IS NOT NULL DROP VIEW BI_Desvio_de_presupuesto;
-IF OBJECT_ID('BI_Ranking_de_aspectos_mejor_y_peor_valorados','V') IS NOT NULL DROP VIEW BI_Ranking_de_aspectos_mejor_y_peor_valorados;
-IF OBJECT_ID('BI_SatisfaccionPromedioPorAgente','V') IS NOT NULL DROP VIEW BI_SatisfaccionPromedioPorAgente;
+DROP FUNCTION IF EXISTS QUEQUE.fn_CalcularEdad;
+DROP FUNCTION IF EXISTS QUEQUE.fn_RangoEtarioCliente;
+DROP FUNCTION IF EXISTS QUEQUE.fn_RangoEtarioAgente;
+DROP FUNCTION IF EXISTS QUEQUE.fn_Temporada;
+
+IF OBJECT_ID('QUEQUE.BI_Ticket_Promedio','V') IS NOT NULL DROP VIEW QUEQUE.BI_Ticket_Promedio;
+IF OBJECT_ID('QUEQUE.BI_Distribucion_Facturacion','V') IS NOT NULL DROP VIEW QUEQUE.BI_Distribucion_Facturacion;
+IF OBJECT_ID('QUEQUE.BI_Ranking_Solicitudes_Temporada','V') IS NOT NULL DROP VIEW QUEQUE.BI_Ranking_Solicitudes_Temporada;
+IF OBJECT_ID('QUEQUE.BI_Anticipacion_Promedio_Solicitudes','V') IS NOT NULL DROP VIEW QUEQUE.BI_Anticipacion_Promedio_Solicitudes;
+IF OBJECT_ID('QUEQUE.BI_Tasa_Aceptacion_Propuestas','V') IS NOT NULL DROP VIEW QUEQUE.BI_Tasa_Aceptacion_Propuestas;
+IF OBJECT_ID('QUEQUE.BI_Cotizacion_Promedio_Temporada','V') IS NOT NULL DROP VIEW QUEQUE.BI_Cotizacion_Promedio_Temporada;
+IF OBJECT_ID('QUEQUE.BI_Tiempo_promedio_de_respuesta','V') IS NOT NULL DROP VIEW QUEQUE.BI_Tiempo_promedio_de_respuesta;
+IF OBJECT_ID('QUEQUE.BI_Desvio_de_presupuesto','V') IS NOT NULL DROP VIEW QUEQUE.BI_Desvio_de_presupuesto;
+IF OBJECT_ID('QUEQUE.BI_Ranking_de_aspectos_mejor_y_peor_valorados','V') IS NOT NULL DROP VIEW QUEQUE.BI_Ranking_de_aspectos_mejor_y_peor_valorados;
+IF OBJECT_ID('QUEQUE.BI_SatisfaccionPromedioPorAgente','V') IS NOT NULL DROP VIEW QUEQUE.BI_SatisfaccionPromedioPorAgente;
 GO
 
-IF OBJECT_ID('BI_Hecho_Valoracion_Encuesta','U') IS NOT NULL DROP TABLE BI_Hecho_Valoracion_Encuesta;
-IF OBJECT_ID('Hecho_Valoracion_Encuesta','U') IS NOT NULL DROP TABLE Hecho_Valoracion_Encuesta;
-IF OBJECT_ID('BI_Hecho_Propuesta','U') IS NOT NULL DROP TABLE BI_Hecho_Propuesta;
-IF OBJECT_ID('Hecho_Propuesta','U') IS NOT NULL DROP TABLE Hecho_Propuesta;
-IF OBJECT_ID('BI_Hecho_Solicitud','U') IS NOT NULL DROP TABLE BI_Hecho_Solicitud;
-IF OBJECT_ID('Hecho_Solicitud','U') IS NOT NULL DROP TABLE Hecho_Solicitud;
-IF OBJECT_ID('BI_Hecho_Venta','U') IS NOT NULL DROP TABLE BI_Hecho_Venta;
-IF OBJECT_ID('Hecho_Venta','U') IS NOT NULL DROP TABLE Hecho_Venta;
+IF OBJECT_ID('QUEQUE.BI_Hecho_Valoracion_Encuesta','U') IS NOT NULL DROP TABLE QUEQUE.BI_Hecho_Valoracion_Encuesta;
+IF OBJECT_ID('QUEQUE.Hecho_Valoracion_Encuesta','U') IS NOT NULL DROP TABLE QUEQUE.Hecho_Valoracion_Encuesta;
+IF OBJECT_ID('QUEQUE.BI_Hecho_Propuesta','U') IS NOT NULL DROP TABLE QUEQUE.BI_Hecho_Propuesta;
+IF OBJECT_ID('QUEQUE.Hecho_Propuesta','U') IS NOT NULL DROP TABLE QUEQUE.Hecho_Propuesta;
+IF OBJECT_ID('QUEQUE.BI_Hecho_Solicitud','U') IS NOT NULL DROP TABLE QUEQUE.BI_Hecho_Solicitud;
+IF OBJECT_ID('QUEQUE.Hecho_Solicitud','U') IS NOT NULL DROP TABLE QUEQUE.Hecho_Solicitud;
+IF OBJECT_ID('QUEQUE.BI_Hecho_Venta','U') IS NOT NULL DROP TABLE QUEQUE.BI_Hecho_Venta;
+IF OBJECT_ID('QUEQUE.Hecho_Venta','U') IS NOT NULL DROP TABLE QUEQUE.Hecho_Venta;
 GO
 
-IF OBJECT_ID('BI_DIM_RangoEAgente','U') IS NOT NULL DROP TABLE BI_DIM_RangoEAgente;
-IF OBJECT_ID('DIM_RangoEAgente','U') IS NOT NULL DROP TABLE DIM_RangoEAgente;
-IF OBJECT_ID('BI_DIM_RangoECliente','U') IS NOT NULL DROP TABLE BI_DIM_RangoECliente;
-IF OBJECT_ID('DIM_RangoECliente','U') IS NOT NULL DROP TABLE DIM_RangoECliente;
-IF OBJECT_ID('BI_DIM_Tiempo','U') IS NOT NULL DROP TABLE BI_DIM_Tiempo;
-IF OBJECT_ID('DIM_Tiempo','U') IS NOT NULL DROP TABLE DIM_Tiempo;
-IF OBJECT_ID('BI_DIM_Temporada','U') IS NOT NULL DROP TABLE BI_DIM_Temporada;
-IF OBJECT_ID('DIM_Temporada','U') IS NOT NULL DROP TABLE DIM_Temporada;
-IF OBJECT_ID('BI_DIM_TipoServicio','U') IS NOT NULL DROP TABLE BI_DIM_TipoServicio;
-IF OBJECT_ID('DIM_TipoServicio','U') IS NOT NULL DROP TABLE DIM_TipoServicio;
-IF OBJECT_ID('BI_DIM_CanalVenta','U') IS NOT NULL DROP TABLE BI_DIM_CanalVenta;
-IF OBJECT_ID('DIM_CanalVenta','U') IS NOT NULL DROP TABLE DIM_CanalVenta;
-IF OBJECT_ID('BI_DIM_Aspecto','U') IS NOT NULL DROP TABLE BI_DIM_Aspecto;
-IF OBJECT_ID('DIM_Aspecto','U') IS NOT NULL DROP TABLE DIM_Aspecto;
-IF OBJECT_ID('BI_DIM_EstadoPropuesta','U') IS NOT NULL DROP TABLE BI_DIM_EstadoPropuesta;
-IF OBJECT_ID('DIM_EstadoPropuesta','U') IS NOT NULL DROP TABLE DIM_EstadoPropuesta;
+IF OBJECT_ID('QUEQUE.BI_DIM_RangoEAgente','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_RangoEAgente;
+IF OBJECT_ID('QUEQUE.DIM_RangoEAgente','U') IS NOT NULL DROP TABLE QUEQUE.DIM_RangoEAgente;
+IF OBJECT_ID('QUEQUE.BI_DIM_RangoECliente','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_RangoECliente;
+IF OBJECT_ID('QUEQUE.DIM_RangoECliente','U') IS NOT NULL DROP TABLE QUEQUE.DIM_RangoECliente;
+IF OBJECT_ID('QUEQUE.BI_DIM_Tiempo','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_Tiempo;
+IF OBJECT_ID('QUEQUE.DIM_Tiempo','U') IS NOT NULL DROP TABLE QUEQUE.DIM_Tiempo;
+IF OBJECT_ID('QUEQUE.BI_DIM_Temporada','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_Temporada;
+IF OBJECT_ID('QUEQUE.DIM_Temporada','U') IS NOT NULL DROP TABLE QUEQUE.DIM_Temporada;
+IF OBJECT_ID('QUEQUE.BI_DIM_TipoServicio','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_TipoServicio;
+IF OBJECT_ID('QUEQUE.DIM_TipoServicio','U') IS NOT NULL DROP TABLE QUEQUE.DIM_TipoServicio;
+IF OBJECT_ID('QUEQUE.BI_DIM_CanalVenta','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_CanalVenta;
+IF OBJECT_ID('QUEQUE.DIM_CanalVenta','U') IS NOT NULL DROP TABLE QUEQUE.DIM_CanalVenta;
+IF OBJECT_ID('QUEQUE.BI_DIM_Aspecto','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_Aspecto;
+IF OBJECT_ID('QUEQUE.DIM_Aspecto','U') IS NOT NULL DROP TABLE QUEQUE.DIM_Aspecto;
+IF OBJECT_ID('QUEQUE.BI_DIM_EstadoPropuesta','U') IS NOT NULL DROP TABLE QUEQUE.BI_DIM_EstadoPropuesta;
+IF OBJECT_ID('QUEQUE.DIM_EstadoPropuesta','U') IS NOT NULL DROP TABLE QUEQUE.DIM_EstadoPropuesta;
 GO
 
 -- Procedures
