@@ -5,49 +5,49 @@ GO
 -- DIMENSIONES
 -- ==========================================
 
-CREATE TABLE DIM_RangoEAgente (
+CREATE TABLE BI_DIM_RangoEAgente (
     ID int IDENTITY(1,1) PRIMARY KEY,
     desde int NOT NULL,
     hasta int NOT NULL
 );
 
-CREATE TABLE DIM_RangoECliente (
+CREATE TABLE BI_DIM_RangoECliente (
     ID int IDENTITY(1,1) PRIMARY KEY,
     desde int NOT NULL,
     hasta int NOT NULL
 );
 
-CREATE TABLE DIM_Tiempo (
-    ID int PRIMARY KEY, -- Generalmente se usa formato YYYYMMDD
+CREATE TABLE BI_DIM_Tiempo (
+    ID int PRIMARY KEY, 
     Año int NOT NULL,
     Cuatrimestre int NOT NULL,
     Mes int NOT NULL
 );
 
-CREATE TABLE DIM_Temporada (
+CREATE TABLE BI_DIM_Temporada (
     ID int IDENTITY(1,1) PRIMARY KEY,
     descripcion varchar(255) NOT NULL,
     desde_mes int NOT NULL,
     hasta_mes int NOT NULL
 );
 
-CREATE TABLE DIM_TipoServicio (
+CREATE TABLE BI_DIM_TipoServicio (
     ID int IDENTITY(1,1) PRIMARY KEY,
     descripcion nvarchar(50) NOT NULL
 );
 
 -- Estas dimensiones provienen de tu DER transaccional
-CREATE TABLE DIM_CanalVenta (
+CREATE TABLE BI_DIM_CanalVenta (
     id_canal bigint PRIMARY KEY,
     Descripcion varchar(255) NOT NULL
 );
 
-CREATE TABLE DIM_Aspecto (
+CREATE TABLE BI_DIM_Aspecto (
     id_aspecto bigint PRIMARY KEY,
     Descripcion varchar(255) NOT NULL
 );
 
-CREATE TABLE DIM_EstadoPropuesta (
+CREATE TABLE BI_DIM_EstadoPropuesta (
     id_estado bigint PRIMARY KEY,
     Descripcion varchar(255) NOT NULL
 );
@@ -56,7 +56,7 @@ CREATE TABLE DIM_EstadoPropuesta (
 -- HECHOS
 -- ==========================================
 
-CREATE TABLE Hecho_Valoracion_Encuesta (
+CREATE TABLE BI_Hecho_Valoracion_Encuesta (
     id_encuesta       bigint,
     Tiempo            int,
     Aspecto           bigint,
@@ -69,11 +69,13 @@ CREATE TABLE Hecho_Valoracion_Encuesta (
 );
 GO
 
-CREATE TABLE Hecho_Propuesta (
+CREATE TABLE BI_Hecho_Propuesta (
     id_propuesta bigint PRIMARY KEY,
     Tiempo int,
     RangoEtarioAgente int,
     Temporada int,
+    TiempoInicioViaje int,
+    TemporadaInicio int,
     EstadoPropuesta bigint,
     importe_total decimal(18,2),
     tiempo_respuesta_dias int, 
@@ -84,7 +86,7 @@ CREATE TABLE Hecho_Propuesta (
     FOREIGN KEY (EstadoPropuesta) REFERENCES DIM_EstadoPropuesta(id_estado)
 );
 
-CREATE TABLE Hecho_Solicitud (
+CREATE TABLE BI_Hecho_Solicitud (
     id_solicitud bigint PRIMARY KEY,
     Tiempo int,
     RangoEtarioAgente int,
@@ -98,7 +100,7 @@ CREATE TABLE Hecho_Solicitud (
     FOREIGN KEY (Temporada) REFERENCES DIM_Temporada(ID)
 );
 
-CREATE TABLE Hecho_Venta (
+CREATE TABLE BI_Hecho_Venta (
     id_venta bigint PRIMARY KEY,
     Tiempo int,
     RangoEtarioAgente int,
@@ -135,7 +137,6 @@ BEGIN
 END
 GO
 
--- Bordes inclusivos del lado "menor": 25 -> primer rango, 35 -> segundo, 50 -> tercero
 IF OBJECT_ID('dbo.fn_RangoEtarioCliente') IS NOT NULL DROP FUNCTION dbo.fn_RangoEtarioCliente;
 GO
 CREATE FUNCTION dbo.fn_RangoEtarioCliente(@Edad INT)
@@ -146,10 +147,10 @@ BEGIN
     IF @Edad IS NULL RETURN NULL;
 
     SELECT @ID = CASE
-        WHEN @Edad <= 25 THEN (SELECT ID FROM DIM_RangoECliente WHERE desde = 0  AND hasta = 25)
-        WHEN @Edad <= 35 THEN (SELECT ID FROM DIM_RangoECliente WHERE desde = 25 AND hasta = 35)
-        WHEN @Edad <= 50 THEN (SELECT ID FROM DIM_RangoECliente WHERE desde = 35 AND hasta = 50)
-        ELSE                  (SELECT ID FROM DIM_RangoECliente WHERE desde = 50)
+        WHEN @Edad <= 25 THEN (SELECT ID FROM BI_DIM_RangoECliente WHERE desde = 0  AND hasta = 25)
+        WHEN @Edad <= 35 THEN (SELECT ID FROM BI_DIM_RangoECliente WHERE desde = 25 AND hasta = 35)
+        WHEN @Edad <= 50 THEN (SELECT ID FROM BI_DIM_RangoECliente WHERE desde = 35 AND hasta = 50)
+        ELSE                  (SELECT ID FROM BI_DIM_RangoECliente WHERE desde = 50)
     END;
     RETURN @ID;
 END
@@ -164,12 +165,10 @@ BEGIN
     DECLARE @ID INT;
     IF @Edad IS NULL RETURN NULL;
 
-    -- Nota: el enunciado no define rango para agentes menores de 25.
-    -- Por defecto, caen en el primer rango definido (25-35).
     SELECT @ID = CASE
-        WHEN @Edad <= 35 THEN (SELECT ID FROM DIM_RangoEAgente WHERE desde = 25 AND hasta = 35)
-        WHEN @Edad <= 50 THEN (SELECT ID FROM DIM_RangoEAgente WHERE desde = 35 AND hasta = 50)
-        ELSE                  (SELECT ID FROM DIM_RangoEAgente WHERE desde = 50)
+        WHEN @Edad <= 35 THEN (SELECT ID FROM BI_DIM_RangoEAgente WHERE desde = 25 AND hasta = 35)
+        WHEN @Edad <= 50 THEN (SELECT ID FROM BI_DIM_RangoEAgente WHERE desde = 35 AND hasta = 50)
+        ELSE                  (SELECT ID FROM BI_DIM_RangoEAgente WHERE desde = 50)
     END;
     RETURN @ID;
 END
@@ -182,7 +181,7 @@ RETURNS INT
 AS
 BEGIN
     IF @Mes IS NULL RETURN NULL;
-    RETURN (SELECT ID FROM DIM_Temporada WHERE @Mes BETWEEN desde_mes AND hasta_mes);
+    RETURN (SELECT ID FROM BI_DIM_Temporada WHERE @Mes BETWEEN desde_mes AND hasta_mes);
 END
 GO
 
@@ -190,42 +189,42 @@ GO
 -- 2) CARGA DE DIMENSIONES
 -- ============================================================
 
-INSERT INTO DIM_RangoEAgente (desde, hasta) VALUES
+INSERT INTO BI_DIM_RangoEAgente (desde, hasta) VALUES
     (25, 35),
     (35, 50),
     (50, 150);   -- 150 = sentinela de "sin tope superior"
 
-INSERT INTO DIM_RangoECliente (desde, hasta) VALUES
+INSERT INTO BI_DIM_RangoECliente (desde, hasta) VALUES
     (0, 25),
     (25, 35),
     (35, 50),
     (50, 150);
 
-INSERT INTO DIM_Temporada (descripcion, desde_mes, hasta_mes) VALUES
+INSERT INTO BI_DIM_Temporada (descripcion, desde_mes, hasta_mes) VALUES
     ('Verano',    1, 3),
     ('Otoño',     4, 6),
     ('Invierno',  7, 9),
     ('Primavera', 10, 12);
 
-INSERT INTO DIM_TipoServicio (descripcion) VALUES
+INSERT INTO BI_DIM_TipoServicio (descripcion) VALUES
     ('Venta Directa'),
     ('Propuesta a Medida');
 
-INSERT INTO DIM_CanalVenta (id_canal, Descripcion)
+INSERT INTO BI_DIM_CanalVenta (id_canal, Descripcion)
 SELECT id_canal, descripcion
 FROM QUEQUE.CanalVenta;
 
-INSERT INTO DIM_Aspecto (id_aspecto, Descripcion)
+INSERT INTO BI_DIM_Aspecto (id_aspecto, Descripcion)
 SELECT id_aspecto, descripcion
 FROM QUEQUE.AspectoValorado;
 
-INSERT INTO DIM_EstadoPropuesta (id_estado, Descripcion)
+INSERT INTO BI_DIM_EstadoPropuesta (id_estado, Descripcion)
 SELECT id_estado, descripcion
 FROM QUEQUE.EstadoPropuesta;
 
 -- DIM_Tiempo: una fila por cada fecha distinta que aparece en las
 -- fuentes usadas por los hechos (solicitud, propuesta, venta, encuesta)
-INSERT INTO DIM_Tiempo (ID, Año, Cuatrimestre, Mes)
+INSERT INTO BI_DIM_Tiempo (ID, Año, Cuatrimestre, Mes)
 SELECT DISTINCT
     YEAR(Fecha) * 10000 + MONTH(Fecha) * 100 + DATEPART(QUARTER, Fecha) AS ID,
     YEAR(Fecha)                                                         AS Año,
@@ -235,6 +234,8 @@ FROM (
     SELECT fecha_solicitud AS Fecha FROM QUEQUE.SolicitudCotizacion WHERE fecha_solicitud IS NOT NULL
     UNION
     SELECT fecha_emision   AS Fecha FROM QUEQUE.Propuesta           WHERE fecha_emision   IS NOT NULL
+    UNION
+    SELECT fecha_desde     AS Fecha FROM QUEQUE.Propuesta           WHERE fecha_desde     IS NOT NULL
     UNION
     SELECT fecha_venta     AS Fecha FROM QUEQUE.Venta               WHERE fecha_venta     IS NOT NULL
     UNION
@@ -247,7 +248,7 @@ GO
 -- ============================================================
 
 -- 3.1) Hecho_Valoracion_Encuesta
-INSERT INTO Hecho_Valoracion_Encuesta (id_encuesta, Tiempo, Aspecto, RangoEtarioAgente, Puntaje)
+INSERT INTO BI_Hecho_Valoracion_Encuesta (id_encuesta, Tiempo, Aspecto, RangoEtarioAgente, Puntaje)
 SELECT
     ve.id_encuesta,
     YEAR(e.fecha) * 10000 + MONTH(e.fecha) * 100 + DATEPART(QUARTER, Fecha)     AS Tiempo,
@@ -261,27 +262,29 @@ WHERE e.fecha IS NOT NULL;
 
 -- 3.2) Hecho_Propuesta
 -- Temporada según fecha_desde (inicio del viaje propuesto, no la emisión)
-INSERT INTO Hecho_Propuesta (
-    id_propuesta, Tiempo, RangoEtarioAgente, Temporada, EstadoPropuesta,
-    importe_total, tiempo_respuesta_dias, desvio_presupuesto
+INSERT INTO BI_Hecho_Propuesta (
+    id_propuesta, Tiempo, TiempoInicioViaje, RangoEtarioAgente, Temporada, EstadoPropuesta,
+    importe_total, tiempo_respuesta_dias, desvio_presupuesto, TemporadaInicio
 )
 SELECT
     p.id_propuesta,
-    YEAR(p.fecha_emision) * 10000 + MONTH(p.fecha_emision) * 100 + DATEPART(QUARTER,p.fecha_emision) AS Tiempo,
-    dbo.fn_RangoEtarioAgente(dbo.fn_CalcularEdad(ag.fecha_nacimiento, p.fecha_emision))  AS RangoEtarioAgente,
-    dbo.fn_Temporada(MONTH(p.fecha_desde))                                               AS Temporada,
-    p.id_estado                                                                          AS EstadoPropuesta,
+    YEAR(p.fecha_emision) * 10000 + MONTH(p.fecha_emision) * 100 + DATEPART(QUARTER, p.fecha_emision) AS Tiempo,
+    YEAR(p.fecha_desde)   * 10000 + MONTH(p.fecha_desde)   * 100 + DATEPART(QUARTER, p.fecha_desde)   AS TiempoInicioViaje,
+    dbo.fn_RangoEtarioAgente(dbo.fn_CalcularEdad(ag.fecha_nacimiento, p.fecha_emision))               AS RangoEtarioAgente,
+    dbo.fn_Temporada(MONTH(p.fecha_emision))                                                          AS Temporada,
+    p.id_estado                                                                                       AS EstadoPropuesta,
     p.importe_total,
-    DATEDIFF(DAY, s.fecha_solicitud, p.fecha_emision)                                    AS tiempo_respuesta_dias,
-    p.importe_total - s.presupuesto_estimado                                             AS desvio_presupuesto
+    DATEDIFF(DAY, s.fecha_solicitud, p.fecha_emision)                                                 AS tiempo_respuesta_dias,
+    p.importe_total - s.presupuesto_estimado                                                          AS desvio_presupuesto,
+    dbo.fn_Temporada(MONTH(p.fecha_desde))                                                            AS TemporadaInicio
 FROM QUEQUE.Propuesta p
-JOIN QUEQUE.Agente ag               ON ag.legajo     = p.id_agente
-JOIN QUEQUE.SolicitudCotizacion s   ON s.nro_solicitud = p.nro_solicitud
+JOIN QUEQUE.Agente ag             ON ag.legajo       = p.id_agente
+JOIN QUEQUE.SolicitudCotizacion s ON s.nro_solicitud = p.nro_solicitud
 WHERE p.fecha_emision IS NOT NULL AND p.fecha_desde IS NOT NULL;
 
 -- 3.3) Hecho_Solicitud
 -- Temporada según fecha_inicio_tentativa (cuándo quiere viajar el cliente)
-INSERT INTO Hecho_Solicitud (
+INSERT INTO BI_Hecho_Solicitud (
     id_solicitud, Tiempo, RangoEtarioAgente, RangoEtarioCliente, Temporada,
     fecha_solicitud, fecha_inicio_tentativa
 )
@@ -301,7 +304,7 @@ WHERE s.fecha_solicitud IS NOT NULL AND s.fecha_inicio_tentativa IS NOT NULL;
 -- 3.4) Hecho_Venta
 -- TipoServicio: "Propuesta a Medida" si la venta viene de una Propuesta
 -- (existe en Venta_X_Propuesta), si no "Venta Directa"
-INSERT INTO Hecho_Venta (
+INSERT INTO BI_Hecho_Venta (
     id_venta, Tiempo, RangoEtarioAgente, RangoEtarioCliente, Temporada,
     CanalVenta, TipoServicio, importe_total
 )
@@ -311,7 +314,7 @@ SELECT
     dbo.fn_RangoEtarioAgente(dbo.fn_CalcularEdad(ag.fecha_nacimiento, v.fecha_venta))    AS RangoEtarioAgente,
     dbo.fn_RangoEtarioCliente(dbo.fn_CalcularEdad(c.fecha_nacimiento, v.fecha_venta))    AS RangoEtarioCliente,
     dbo.fn_Temporada(MONTH(v.fecha_venta))                                               AS Temporada,
-    v.id_canal                                                                          AS CanalVenta,
+    v.id_canal                                                                           AS CanalVenta,
     (
         SELECT ID FROM DIM_TipoServicio
         WHERE descripcion = CASE
@@ -332,7 +335,7 @@ GO
 -- 4) CONTROL RAPIDO (opcional, para verificar que no haya quedado nada afuera)
 -- ============================================================
 SELECT 'SolicitudCotizacion' AS Tabla, COUNT(*) AS Origen,
-       (SELECT COUNT(*) FROM Hecho_Solicitud) AS Migrado
+       (SELECT COUNT(*) FROM BI_Hecho_Solicitud) AS Migrado
 FROM QUEQUE.SolicitudCotizacion
 UNION ALL
 SELECT 'Propuesta', COUNT(*), (SELECT COUNT(*) FROM Hecho_Propuesta) FROM QUEQUE.Propuesta
@@ -343,101 +346,68 @@ SELECT 'ValoracionEncuesta', COUNT(*), (SELECT COUNT(*) FROM Hecho_Valoracion_En
 GO
 
 -- Vista 1
+
 CREATE VIEW BI_Ticket_Promedio AS
 SELECT 
-    t.Año,
-    t.Mes,
-    rc.desde AS Cliente_Edad_Desde,
-    rc.hasta AS Cliente_Edad_Hasta,
-    cv.Descripcion AS Canal_Venta,
+    t.Año, t.Mes, v.RangoEtarioCliente, cv.Descripcion AS Canal_Venta,
     str(AVG(v.importe_total),15,2) AS Ticket_Promedio
-FROM Hecho_Venta v
-JOIN DIM_Tiempo t ON v.Tiempo = t.ID
-JOIN DIM_RangoECliente rc ON v.RangoEtarioCliente = rc.ID
-JOIN DIM_CanalVenta cv ON v.CanalVenta = cv.id_canal
-GROUP BY 
-    t.Año, 
-    t.Mes, 
-    rc.desde, 
-    rc.hasta, 
-    cv.Descripcion;
-GO 
+FROM BI_Hecho_Venta v
+JOIN BI_DIM_Tiempo t ON v.Tiempo = t.ID
+JOIN BI_DIM_CanalVenta cv ON v.CanalVenta = cv.id_canal
+GROUP BY t.Año, t.Mes, cv.Descripcion, v.RangoEtarioCliente;
+GO
 
 -- Vista 2
+
 CREATE VIEW BI_Distribucion_Facturacion AS
 SELECT 
-    t.Año,
-    t.Cuatrimestre,
-    ts.descripcion AS Tipo_Servicio,
+    t.Año, t.Cuatrimestre, ts.descripcion AS Tipo_Servicio,
     SUM(v.importe_total) AS Facturacion_Absoluta,
     str(SUM(v.importe_total) * 100 /
-        (SELECT SUM(v2.importe_total) FROM Hecho_Venta v2 
-            JOIN DIM_Tiempo t2 ON v2.Tiempo = t2.ID WHERE t2.Año = t.Año AND t2.Cuatrimestre = t.Cuatrimestre),15,2) AS Porcentaje_Facturacion
-FROM Hecho_Venta v
-JOIN DIM_Tiempo t ON v.Tiempo = t.ID
-JOIN DIM_TipoServicio ts ON v.TipoServicio = ts.ID
-GROUP BY 
-    t.Año, 
-    t.Cuatrimestre, 
-    ts.descripcion;
-GO 
+        (SELECT SUM(v2.importe_total) FROM BI_Hecho_Venta v2 
+            JOIN BI_DIM_Tiempo t2 ON v2.Tiempo = t2.ID WHERE t2.Año = t.Año AND t2.Cuatrimestre = t.Cuatrimestre),15,2) AS Porcentaje_Facturacion
+FROM BI_Hecho_Venta v
+JOIN BI_DIM_Tiempo t ON v.Tiempo = t.ID
+JOIN BI_DIM_TipoServicio ts ON v.TipoServicio = ts.ID
+GROUP BY t.Año, t.Cuatrimestre, ts.descripcion;
+GO
 
 -- Vista 3
 
 CREATE VIEW BI_Ranking_Solicitudes_Temporada AS
 SELECT 
-    t.Año,
-    temp.descripcion AS Temporada,
-    rc.desde AS Cliente_Edad_Desde,
-    rc.hasta AS Cliente_Edad_Hasta,
+    t.Año, temp.descripcion AS Temporada, s.RangoEtarioCliente,
     COUNT(s.id_solicitud) AS Cantidad_Solicitudes
-FROM Hecho_Solicitud s
-JOIN DIM_Tiempo t ON s.Tiempo = t.ID
-JOIN DIM_Temporada temp ON s.Temporada = temp.ID
-JOIN DIM_RangoECliente rc ON s.RangoEtarioCliente = rc.ID
-GROUP BY 
-    t.Año,
-    temp.descripcion,
-    rc.desde,
-    rc.hasta;
+FROM BI_Hecho_Solicitud s
+JOIN BI_DIM_Tiempo t ON s.Tiempo = t.ID
+JOIN BI_DIM_Temporada temp ON s.Temporada = temp.ID
+GROUP BY t.Año, temp.descripcion, s.RangoEtarioCliente
 GO
 
 -- Vista 4
 
 CREATE VIEW BI_Anticipacion_Promedio_Solicitudes AS
 SELECT 
-    t.Año,
-    t.Cuatrimestre,
-    rc.desde AS Cliente_Edad_Desde,
-    rc.hasta AS Cliente_Edad_Hasta,
+    t.Año, t.Cuatrimestre, s.RangoEtarioCliente,
     AVG(DATEDIFF(DAY, s.fecha_solicitud, s.fecha_inicio_tentativa)) AS Anticipacion_Promedio_Dias
-FROM Hecho_Solicitud s
-JOIN DIM_Tiempo t ON s.Tiempo = t.ID
-JOIN DIM_RangoECliente rc ON s.RangoEtarioCliente = rc.ID
-GROUP BY 
-    t.Año,
-    t.Cuatrimestre,
-    rc.desde,
-    rc.hasta;
+FROM BI_Hecho_Solicitud s
+JOIN BI_DIM_Tiempo t ON s.Tiempo = t.ID
+GROUP BY t.Año, t.Cuatrimestre, s.RangoEtarioCliente
 GO
 
 -- Vista 5
 
 CREATE VIEW BI_Tasa_Aceptacion_Propuestas AS
 SELECT 
-    t.Año,
-    t.Cuatrimestre,
-    ep.Descripcion AS Estado_Propuesta,
+    t.Año, t.Cuatrimestre, ep.Descripcion AS Estado_Propuesta,
     COUNT(p.id_propuesta) AS Cantidad_Absoluta,
-    str((COUNT(p.id_propuesta) * 100.0 / (SELECT COUNT(p2.id_propuesta) FROM Hecho_Propuesta p2 JOIN DIM_Tiempo t2 ON p2.Tiempo = t2.ID WHERE t2.Año = t.Año AND t2.Cuatrimestre = t.Cuatrimestre)),5,2) AS Tasa_Porcentaje
-
-FROM Hecho_Propuesta p
-JOIN DIM_Tiempo t ON p.Tiempo = t.ID
-JOIN DIM_EstadoPropuesta ep ON p.EstadoPropuesta = ep.id_estado
-GROUP BY 
-    t.Año,
-    t.Cuatrimestre,
-    ep.Descripcion;
+    str((COUNT(p.id_propuesta) * 100.0 / 
+        (SELECT COUNT(p2.id_propuesta) FROM BI_Hecho_Propuesta p2 
+            JOIN BI_DIM_Tiempo t2 ON p2.Tiempo = t2.ID WHERE t2.Año = t.Año AND t2.Cuatrimestre = t.Cuatrimestre)),5,2) AS Tasa_Porcentaje
+FROM BI_Hecho_Propuesta p
+JOIN BI_DIM_Tiempo t ON p.Tiempo = t.ID
+JOIN BI_DIM_EstadoPropuesta ep ON p.EstadoPropuesta = ep.id_estado
+GROUP BY t.Año, t.Cuatrimestre, ep.Descripcion;
 GO
 
 -- Vista 6
@@ -447,56 +417,49 @@ SELECT
     t.Año,
     temp.descripcion AS Temporada,
     str(AVG(p.importe_total),18,2) AS Cotizacion_Promedio
-FROM Hecho_Propuesta p
-JOIN DIM_Tiempo t ON p.Tiempo = t.ID
-JOIN DIM_Temporada temp ON p.Temporada = temp.ID
-GROUP BY 
-    t.Año,
-    temp.descripcion;
+FROM BI_Hecho_Propuesta p
+JOIN BI_DIM_Tiempo t ON p.TiempoInicioViaje = t.ID
+JOIN BI_DIM_Temporada temp ON p.TemporadaInicio = temp.ID
+GROUP BY t.Año, temp.descripcion;
 GO
 
--- Vista 7 - Tiempo promedio de respuesta
+-- Vista 7
 
 CREATE VIEW BI_Tiempo_promedio_de_respuesta AS
 SELECT
-    h.RangoEtarioAgente,
-    t.Mes,
+    h.RangoEtarioAgente, t.Mes,
     AVG(h.tiempo_respuesta_dias) promedio_tiempo_respuesta
-FROM Hecho_Propuesta h
-JOIN DIM_Tiempo t on h.Tiempo = t.ID
+FROM BI_Hecho_Propuesta h
+JOIN BI_DIM_Tiempo t on h.Tiempo = t.ID
 GROUP BY h.RangoEtarioAgente, t.Mes
 GO
 
--- Vista 8 - Desvío de presupuesto
+-- Vista 8
 
 CREATE VIEW BI_Desvio_de_presupuesto AS
 SELECT
     AVG(h.desvio_presupuesto) promedio_desvio_presupuesto
-FROM Hecho_Propuesta h
+FROM BI_Hecho_Propuesta h
 GO
 
--- Vista 9 - Ranking de aspectos mejor y peor valorados
+-- Vista 9
 
 CREATE VIEW BI_Ranking_de_aspectos_mejor_y_peor_valorados AS
 SELECT
-    h.Aspecto,
-    t.Cuatrimestre,
+    h.Aspecto, t.Cuatrimestre,
     AVG(h.Puntaje) promedio_puntaje
-FROM Hecho_Valoracion_Encuesta h
-JOIN DIM_Tiempo t on t.ID = h.Tiempo
+FROM BI_Hecho_Valoracion_Encuesta h
+JOIN BI_DIM_Tiempo t on t.ID = h.Tiempo
 GROUP BY h.Aspecto, t.Cuatrimestre
 GO
 
--- Vista 10 - Satisfacción promedio por agente
+--Vista 10
 
 CREATE VIEW BI_SatisfaccionPromedioPorAgente AS
 SELECT 
-    h.RangoEtarioAgente,
-    t.Mes,
+    h.RangoEtarioAgente, t.Mes,
     AVG(h.Puntaje) promedio_puntaje
-FROM Hecho_Valoracion_Encuesta h
-JOIN DIM_Tiempo t on h.Tiempo = t.ID
+FROM BI_Hecho_Valoracion_Encuesta h
+JOIN BI_DIM_Tiempo t on h.Tiempo = t.ID
 GROUP BY h.RangoEtarioAgente, t.Mes
 GO
-
-select * from BI_Desvio_de_presupuesto
